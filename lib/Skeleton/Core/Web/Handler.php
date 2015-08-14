@@ -12,6 +12,7 @@ use Skeleton\I18n\Language;
 namespace Skeleton\Core\Web;
 
 use Skeleton\Core\Application;
+use Skeleton\I18n\Language;
 
 class Handler {
 	/**
@@ -29,7 +30,7 @@ class Handler {
 		/**
 		 * Start the session
 		 */
-		Web_Session::start();
+		Session::start();
 
 		/**
 		 * Hide PHP powered by
@@ -77,14 +78,9 @@ class Handler {
 		}
 
 		/**
-		* Get the config
-		*/
-		$config = Config::get();
-
-		/**
 		 * Handle the media
 		 */
-		Web_Media::detect($application->request_relative_uri);
+		Media::detect($application->request_relative_uri);
 
 		/**
 		 * Find the module to load
@@ -92,7 +88,8 @@ class Handler {
 		try {
 			// Attempt to find the module by matching defined routes
 			$module = $application->route($request_uri);
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
+
 			// So there is no route defined.
 
 			/**
@@ -104,17 +101,17 @@ class Handler {
 			if (file_exists($application->module_path . '/' . $filename . '.php')) {
 				require $application->module_path . '/' . $filename . '.php';
 				$classname = 'Web_Module_' . implode('_', $request_uri_parts);
-			} elseif (file_exists($application->module_path . '/' . $filename . '/' . $config->module_default . '.php')) {
-				require $application->module_path . '/' . $filename . '/' . $config->module_default . '.php';
+			} elseif (file_exists($application->module_path . '/' . $filename . '/' . $application->config->module_default . '.php')) {
+				require $application->module_path . '/' . $filename . '/' . $application->config->module_default . '.php';
 
 				if ($filename == '') {
-					$classname = 'Web_Module_' . $config->module_default;
+					$classname = 'Web_Module_' . $application->config->module_default;
 				} else {
-					$classname = 'Web_Module_' . implode('_', $request_uri_parts) . '_' . $config->module_default;
+					$classname = 'Web_Module_' . implode('_', $request_uri_parts) . '_' . $application->config->module_default;
 				}
-			} elseif (file_exists($application->module_path . '/' . $config->module_404 . '.php')) {
+			} elseif (file_exists($application->module_path . '/' . $application->config->module_404 . '.php')) {
 				require $application->module_path . '/' . $config->module_404 . '.php';
-				$classname = 'Web_Module_' . $config->module_404;
+				$classname = 'Web_Module_' . $application->config->module_404;
 			} else {
 				header('HTTP/1.0 404 Module not found');
 				exit;

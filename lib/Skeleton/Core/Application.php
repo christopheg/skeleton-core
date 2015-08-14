@@ -113,7 +113,7 @@ class Application {
 		}
 
 		$request_parts = explode('/', $request_uri);
-		$routes = Config::Get()->routes;
+		$routes = $this->config->routes;
 
 		/**
 		 * We need to find the route that matches the most the fixed parts
@@ -161,7 +161,7 @@ class Application {
 		}
 
 		if ($matched_module === null) {
-			throw new Exception('No matching route found');
+			throw new \Exception('No matching route found');
 		}
 
 		/**
@@ -203,7 +203,7 @@ class Application {
 	 *
 	 * @access public
 	 */
-	public function bootstrap(Web_Module $module) {
+	public function bootstrap(\Skeleton\Core\Web\Module $module) {
 		// FIXME: requiring the file and determining the classname should be
 		// generalised
 		if (file_exists($this->path . '/config/Hook.php')) {
@@ -221,7 +221,7 @@ class Application {
 	 *
 	 * @access public
 	 */
-	public function teardown(Web_Module $module) {
+	public function teardown(\Skeleton\Core\Web\Module $module) {
 		// FIXME: requiring the file and determining the classname should be
 		// generalised
 		if (file_exists($this->path . '/config/Hook.php')) {
