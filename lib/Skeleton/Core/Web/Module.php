@@ -72,7 +72,6 @@ abstract class Module {
 		}
 
 		if ($this->template !== null and $this->template !== false) {
-		print_r(get_class($template));
 			$template->display($this->template);
 		}
 
