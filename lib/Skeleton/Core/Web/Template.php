@@ -40,7 +40,8 @@ class Template {
 	 * Constructor
 	 */
 	public function __construct() {
-		$this->template = new \Template();
+		$this->template = new \Skeleton\Template\Template();
+		$this->template->set_template_directory(\Skeleton\Core\Application::Get()->template_path);
 	}
 
 	/**

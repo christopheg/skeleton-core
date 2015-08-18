@@ -7,12 +7,11 @@
  * @author David Vandemaele <david@tigron.be>
  */
 
-use Skeleton\I18n\Language;
-
 namespace Skeleton\Core\Web;
 
 use Skeleton\Core\Application;
 use Skeleton\I18n\Language;
+use Skeleton\Database\Database;
 
 class Handler {
 	/**
@@ -154,11 +153,13 @@ class Handler {
 
 		$module->accept_request();
 
+		/*
 		// Record debug information
 		$database = Database::get();
 		$queries = $database->queries;
 		$execution_time = microtime(true) - $start;
 
 		Util::log_request('Request: http://' . $application->hostname . $_SERVER['REQUEST_URI'] . ' -- IP: ' . $_SERVER['REMOTE_ADDR'] . ' -- Queries: ' . $queries . ' -- Time: ' . $execution_time);
+		*/
 	}
 }
