@@ -27,7 +27,7 @@ class Session {
 	 */
 	public static function redirect($url) {
 		try {
-			$url = Util::rewrite_reverse_link($url);
+			$url = \Skeleton\Core\Util::rewrite_reverse_link($url);
 		} catch (Exception $e) { }
 
 		if ($url == '' OR ($url[0] != '/' AND strpos($url, 'http') === false)) {
