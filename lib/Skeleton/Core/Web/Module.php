@@ -94,10 +94,10 @@ abstract class Module {
 	 */
 	public function get_name() {
 		if (strpos(get_class($this), 'Web_Module_') !== false) {
-			return substr(get_class($this),strlen('Web_Module_'));
+			return strtolower(substr(get_class($this),strlen('Web_Module_')));
 		}
 
-		return get_class($this);
+		return strtolower(get_class($this));
 	}
 
 	/**
