@@ -88,7 +88,6 @@ class Handler {
 			// Attempt to find the module by matching defined routes
 			$module = $application->route($request_uri);
 		} catch (\Exception $e) {
-
 			// So there is no route defined.
 
 			/**
@@ -96,17 +95,19 @@ class Handler {
 			 * 2. Take the default module
 			 * 3. Load 404 module
 			 */
+			$relative_uri_parts = array_values(array_filter(explode('/', $application->request_relative_uri)));
+
 			$filename = trim($application->request_relative_uri, '/');
 			if (file_exists($application->module_path . '/' . $filename . '.php')) {
 				require $application->module_path . '/' . $filename . '.php';
-				$classname = 'Web_Module_' . implode('_', $request_uri_parts);
+				$classname = 'Web_Module_' . implode('_', $relative_uri_parts);
 			} elseif (file_exists($application->module_path . '/' . $filename . '/' . $application->config->module_default . '.php')) {
 				require $application->module_path . '/' . $filename . '/' . $application->config->module_default . '.php';
 
 				if ($filename == '') {
 					$classname = 'Web_Module_' . $application->config->module_default;
 				} else {
-					$classname = 'Web_Module_' . implode('_', $request_uri_parts) . '_' . $application->config->module_default;
+					$classname = 'Web_Module_' . implode('_', $relative_uri_parts) . '_' . $application->config->module_default;
 				}
 			} elseif (file_exists($application->module_path . '/' . $application->config->module_404 . '.php')) {
 				require $application->module_path . '/' . $config->module_404 . '.php';
