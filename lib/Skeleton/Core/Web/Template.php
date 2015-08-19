@@ -56,6 +56,17 @@ class Template {
 	}
 
 	/**
+	 * Add a variable to the environment
+	 *
+	 * @access public
+	 * @param string $key
+	 * @param mixed $value
+	 */
+	public function add_environment($key, $value) {
+		$this->template->add_environment($key, $value);
+	}
+
+	/**
 	 * Display a template
 	 *
 	 * @access public

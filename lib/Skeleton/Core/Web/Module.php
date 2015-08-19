@@ -48,8 +48,7 @@ abstract class Module {
 		 * Determine the template
 		 */
 		$template = \Skeleton\Core\Web\Template::Get();
-		$template->assign('session', $_SESSION);
-		$template->assign('MODULE', get_class($this));
+		$template->add_environment('module', $this);
 
 		if (method_exists($this, 'secure')) {
 			$allowed = $this->secure();
@@ -86,6 +85,19 @@ abstract class Module {
 	 */
 	public function is_login_required() {
 		return $this->login_required;
+	}
+
+	/**
+	 * Get the classname of the current module
+	 *
+	 * @access public
+	 */
+	public function get_name() {
+		if (strpos(get_class($this), 'Web_Module_') !== false) {
+			return substr(get_class($this),strlen('Web_Module_'));
+		}
+
+		return get_class($this);
 	}
 
 	/**
