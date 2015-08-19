@@ -104,19 +104,23 @@ abstract class Module {
 	 * @throws Exception
 	 */
 	public static function get($request_parts) {
-		if (file_exists(strtolower(WEB_PATH . '/module/' . implode('/', $request_parts) . '.php'))) {
+		if (Config::$application_dir === null) {
+			throw new \Exception('No application_dir set. Please set Config::$application_dir');
+		}
+
+		if (file_exists(strtolower(Config::$application_dir . '/module/' . implode('/', $request_parts) . '.php'))) {
 			// Does the module exist on itself?
-			require_once strtolower(WEB_PATH . '/module/' . implode('/', $request_parts) . '.php');
+			require_once strtolower(Config::$application_dir . '/module/' . implode('/', $request_parts) . '.php');
 			$classname = 'Web_Module_' . implode('_', $request_parts);
-		} elseif (file_exists(strtolower(WEB_PATH . '/module/' . implode('/', $request_parts) . '/index.php'))) {
+		} elseif (file_exists(strtolower(Config::$application_dir . '/module/' . implode('/', $request_parts) . '/index.php'))) {
 			// If not, is the module the user asked for actually a directory?
-			require_once strtolower(WEB_PATH . '/module/' . implode('/', $request_parts) . '/index.php');
+			require_once strtolower(Config::$application_dir . '/module/' . implode('/', $request_parts) . '/index.php');
 			$classname = 'Web_Module_' . implode('_', $request_parts) . '_Index';
 			$classname = str_replace('__', '_', $classname);
 		} elseif (isset($request_parts[1]) AND $request_parts[1] == 'support' AND isset($request_parts[2])) {
 			Web_Session::Redirect('/support?action=view&id=' . $request_parts[2]);
-		} elseif (file_exists(strtolower(WEB_PATH . '/module/default.php'))) {
-			require_once WEB_PATH . '/module/default.php';
+		} elseif (file_exists(strtolower(Config::$application_dir . '/module/default.php'))) {
+			require_once Config::$application_dir . '/module/default.php';
 			$classname = 'Web_Module_Default';
 		} else {
 			Web_Session::Redirect('/');
@@ -134,6 +138,10 @@ abstract class Module {
 	 * @return bool
 	 */
 	public static function exists($name) {
-		return (file_exists(WEB_PATH . '/module/' . $name . '.php'));
+		if (Config::$application_dir === null) {
+			throw new \Exception('No application_dir set. Please set Config::$application_dir');
+		}
+
+		return (file_exists(Config::$application_dir . '/module/' . $name . '.php'));
 	}
 }
