@@ -110,7 +110,7 @@ class Handler {
 					$classname = 'Web_Module_' . implode('_', $relative_uri_parts) . '_' . $application->config->module_default;
 				}
 			} elseif (file_exists($application->module_path . '/' . $application->config->module_404 . '.php')) {
-				require $application->module_path . '/' . $config->module_404 . '.php';
+				require $application->module_path . '/' . $application->config->module_404 . '.php';
 				$classname = 'Web_Module_' . $application->config->module_404;
 			} else {
 				header('HTTP/1.0 404 Module not found');
@@ -137,7 +137,7 @@ class Handler {
 			}
 
 			if (!isset($_SESSION['language'])) {
-				$language = Language::get_by_name_short($config->default_language);
+				$language = Language::get_by_name_short($application->config->default_language);
 				$_SESSION['language'] = $language;
 			}
 		}
@@ -147,7 +147,7 @@ class Handler {
 				$language = Language::get_by_name_short($_GET['language']);
 				$_SESSION['language'] = $language;
 			} catch (Exception $e) {
-				$_SESSION['language'] = Language::get_by_name_short($config->default_language);
+				$_SESSION['language'] = Language::get_by_name_short($application->config->default_language);
 			}
 		}
 		$application->language = $_SESSION['language'];
