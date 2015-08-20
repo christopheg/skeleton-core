@@ -36,16 +36,8 @@ class Util {
 			return $data[0];
 		}
 
-		$application = Application::Get();
-
 		$new_link = Util::rewrite_reverse_link($data[3]);
-
-		if (isset($application->config->base_uri) and $application->config->base_uri !== null) {
-			$new_link = trim($application->config->base_uri, '/') . '/' . $new_link;
-			$new_link = trim($new_link, '/');
-		}
-
-		return str_replace($data[3], $new_link, $data[0]);
+		return str_replace('/' . $data[3], $new_link, $data[0]);
 	}
 
 	/**
@@ -55,7 +47,25 @@ class Util {
 	 * @param string $url
 	 * @return string $reverse_rewrite
 	 */
-	public static function rewrite_reverse_link($url_raw) {
+	public static function rewrite_reverse_link($url) {
+		$application = Application::Get();
+
+		$url = Util::rewrite_reverse_link_routes($url);
+		if (isset($application->config->base_uri) and $application->config->base_uri !== null) {
+			$url = '/' . trim($application->config->base_uri, '/') . '/' . trim($url, '/');
+		}
+
+		return $url;
+	}
+
+	/**
+	 * Do a reverse rewrite of a link
+	 *
+	 * @access private
+	 * @param string $url_raw
+	 * @return string $reverse_rewrite
+	 */
+	private static function rewrite_reverse_link_routes($url_raw) {
 		$url = parse_url($url_raw);
 
 		$params = [];
