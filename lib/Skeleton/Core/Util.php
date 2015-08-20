@@ -42,6 +42,7 @@ class Util {
 
 		if (isset($application->config->base_uri) and $application->config->base_uri !== null) {
 			$new_link = trim($application->config->base_uri, '/') . '/' . $new_link;
+			$new_link = trim($new_link, '/');
 		}
 
 		return str_replace($data[3], $new_link, $data[0]);
