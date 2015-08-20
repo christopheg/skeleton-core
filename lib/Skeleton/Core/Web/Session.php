@@ -30,6 +30,12 @@ class Session {
 			$url = \Skeleton\Core\Util::rewrite_reverse_link($url);
 		} catch (Exception $e) { }
 
+		$application = \Skeleton\Core\Application::get();
+
+		if (isset($application->config->base_uri)) {
+			$url = '/' . trim($application->config->base_uri, '/') . '/' . trim ($url, '/');
+		}
+
 		if ($url == '' OR ($url[0] != '/' AND strpos($url, 'http') === false)) {
 			$url = '/' . $url;
 		}
