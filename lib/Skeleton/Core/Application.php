@@ -69,10 +69,10 @@ class Application {
 	/**
 	 * Relative URI to the application's base URI
 	 *
-	 * @var string $relative_uri
+	 * @var string $request_relative_uri
 	 * @access public
 	 */
-	public $relative_uri = null;
+	public $request_relative_uri = null;
 
 	/**
 	 * Language
