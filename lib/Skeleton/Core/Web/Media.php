@@ -122,6 +122,12 @@ class Media {
 			$content = self::fetch('content', $request_string, $extension);
 		}
 
+		// .css files can contain URLs and need to be passed through our URL
+		// rewrite method
+		if (self::get_mime_type($extension) == 'text/css') {
+			$content = \Skeleton\Core\Util::rewrite_reverse_css($content);
+		}
+
 		self::output($extension, $content, $mtime);
 	}
 

@@ -13,31 +13,46 @@ namespace Skeleton\Core;
 class Util {
 
 	/**
-	 * Reverse rewrite
+	 * Reverse rewrite HTML documents
 	 *
 	 * @access public
 	 * @param string $html
-	 * @return string $html_with_reverse_rewrite
+	 * @return string $html
 	 */
 	public static function rewrite_reverse_html($html) {
-		$html = preg_replace_callback('@\<([^>]*) (href|src|action)="/([^"]*)?"@iU', 'self::rewrite_reverse_html_callback', $html);
+		$html = preg_replace_callback(
+			'@\<([^>]*) (href|src|action)="/([^"]*)?"@iU',
+			function ($matches) {
+				if (!isset($matches[3])) {
+					return $matches[0];
+				}
+
+				$uri = Util::rewrite_reverse_link($matches[3]);
+				return str_replace('/' . $matches[3], $uri, $matches[0]);
+			},
+			$html
+		);
+
 		return $html;
 	}
 
 	/**
-	 * Reverse rewrite callback for regexp
+	 * Reverse rewrite CSS documents
 	 *
-	 * @access private
-	 * @param array $data
-	 * @return string $string
+	 * @access public
+	 * @param string $css
+	 * @return string $css
 	 */
-	public static function rewrite_reverse_html_callback($data) {
-		if (!isset($data[3])) {
-			return $data[0];
-		}
+	public static function rewrite_reverse_css($css) {
+		$css = preg_replace_callback(
+			'/url\((?P<url>.*?)\)/i',
+			function ($matches) {
+				return 'url(' . self::rewrite_reverse_link(str_replace('../', '', $matches['url'])) . ')';
+			},
+			$css
+		);
 
-		$new_link = Util::rewrite_reverse_link($data[3]);
-		return str_replace('/' . $data[3], $new_link, $data[0]);
+		return $css;
 	}
 
 	/**
@@ -52,7 +67,10 @@ class Util {
 
 		$url = Util::rewrite_reverse_link_routes($url);
 		if (isset($application->config->base_uri) and $application->config->base_uri !== null) {
-			$url = '/' . trim($application->config->base_uri, '/') . '/' . trim($url, '/');
+			$url = trim($application->config->base_uri, '/') . '/' . trim($url, '/');
+			if (strpos($url, '/') !== 0) {
+				$url = '/' . $url;
+			}
 		}
 
 		return $url;
