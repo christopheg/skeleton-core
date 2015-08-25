@@ -18,4 +18,12 @@ class Config {
 	 * @var string $application_dir
 	 */
 	public static $application_dir = null;
+
+	/**
+	 * Name of the module that handles 403 errors
+	 *
+	 * @access public
+	 * @var string $module_403
+	 */
+	public static $module_403 = null;
 }

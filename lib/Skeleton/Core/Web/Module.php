@@ -53,12 +53,16 @@ abstract class Module {
 		if (method_exists($this, 'secure')) {
 			$allowed = $this->secure();
 			if (!$allowed) {
-				if (file_exists($application->module_path . '/' . $config->module_403 . '.php')) {
-					require $application->module_path . '/' . $config->module_403 . '.php';
-					$classname = 'Web_Module_' . $config->module_403;
-					$module_403 = new $classname;
-					$module_403->accept_request();
+				$module = strtolower(\Skeleton\Core\Config::$module_403);
+
+				if (file_exists($application->module_path . '/' . $module . '.php')) {
+					require $application->module_path . '/' . $module . '.php';
+					$classname = 'Web_Module_' . $module;
+					$module = new $classname;
+					$module->accept_request();
 					exit();
+				} else {
+					throw new \Exception('Access denied');
 				}
 			}
 		}
