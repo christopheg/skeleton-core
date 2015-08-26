@@ -186,8 +186,12 @@ class Media {
 	 * @access private
 	 */
 	private static function output($extension, $content, $mtime) {
+		// Send the Etag before potentially replying with 304
+		header('Etag: ' . crc32($mtime) . '-' . sha1($content));
+
 		self::cache($mtime);
 		header('Content-Type: ' . self::get_mime_type($extension));
+
 		echo $content;
 		exit();
 	}
