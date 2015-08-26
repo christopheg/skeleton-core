@@ -71,9 +71,7 @@ class Handler {
 		try {
 			$application = Application::detect($hostname, $request_uri);
 		} catch (Exception $e) {
-			header("HTTP/1.1 404 Not Found", true);
-			echo '404 File Not Found (application)';
-			return;
+			HTTP\Status::code_404('application');
 		}
 
 		/**

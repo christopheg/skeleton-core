@@ -137,9 +137,7 @@ class Media {
 	 * @access private
 	 */
 	private static function fail() {
-		header("HTTP/1.1 404 Not Found", true);
-		echo '404 File Not Found (media)';
-		exit();
+		HTTP\StatusCode::404('media');
 	}
 
 	/**

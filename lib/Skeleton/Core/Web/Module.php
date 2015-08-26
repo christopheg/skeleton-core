@@ -133,8 +133,7 @@ abstract class Module {
 			require $application->module_path . '/' . $application->config->module_404 . '.php';
 			$classname = 'Web_Module_' . $application->config->module_404;
 		} else {
-			header('HTTP/1.0 404 Module not found');
-			exit;
+			\Skeleton\Core\Web\HTTP\Status::code_404('module');
 		}
 
 		return new $classname;
