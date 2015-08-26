@@ -112,31 +112,32 @@ abstract class Module {
 	 * @return Web_Module Requested module
 	 * @throws Exception
 	 */
-	public static function get($request_parts) {
-		if (Config::$application_dir === null) {
-			throw new \Exception('No application_dir set. Please set Config::$application_dir');
-		}
+	public static function get($request_relative_uri) {
+		$application = \Skeleton\Core\Application::get();
 
-		if (file_exists(strtolower(Config::$application_dir . '/module/' . implode('/', $request_parts) . '.php'))) {
-			// Does the module exist on itself?
-			require_once strtolower(Config::$application_dir . '/module/' . implode('/', $request_parts) . '.php');
-			$classname = 'Web_Module_' . implode('_', $request_parts);
-		} elseif (file_exists(strtolower(Config::$application_dir . '/module/' . implode('/', $request_parts) . '/index.php'))) {
-			// If not, is the module the user asked for actually a directory?
-			require_once strtolower(Config::$application_dir . '/module/' . implode('/', $request_parts) . '/index.php');
-			$classname = 'Web_Module_' . implode('_', $request_parts) . '_Index';
-			$classname = str_replace('__', '_', $classname);
-		} elseif (isset($request_parts[1]) AND $request_parts[1] == 'support' AND isset($request_parts[2])) {
-			Web_Session::Redirect('/support?action=view&id=' . $request_parts[2]);
-		} elseif (file_exists(strtolower(Config::$application_dir . '/module/default.php'))) {
-			require_once Config::$application_dir . '/module/default.php';
-			$classname = 'Web_Module_Default';
+		$relative_uri_parts = array_values(array_filter(explode('/', $request_relative_uri)));
+
+		$filename = trim($request_relative_uri, '/');
+		if (file_exists($application->module_path . '/' . $filename . '.php')) {
+			require $application->module_path . '/' . $filename . '.php';
+			$classname = 'Web_Module_' . implode('_', $relative_uri_parts);
+		} elseif (file_exists($application->module_path . '/' . $filename . '/' . $application->config->module_default . '.php')) {
+			require $application->module_path . '/' . $filename . '/' . $application->config->module_default . '.php';
+
+			if ($filename == '') {
+				$classname = 'Web_Module_' . $application->config->module_default;
+			} else {
+				$classname = 'Web_Module_' . implode('_', $relative_uri_parts) . '_' . $application->config->module_default;
+			}
+		} elseif (file_exists($application->module_path . '/' . $application->config->module_404 . '.php')) {
+			require $application->module_path . '/' . $application->config->module_404 . '.php';
+			$classname = 'Web_Module_' . $application->config->module_404;
 		} else {
-			Web_Session::Redirect('/');
+			header('HTTP/1.0 404 Module not found');
+			exit;
 		}
 
-		$module = new $classname();
-		return $module;
+		return new $classname;
 	}
 
 	/**
