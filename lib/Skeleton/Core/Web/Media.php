@@ -83,7 +83,7 @@ class Media {
 				$file_mtime = self::fetch('mtime', $file, $extension);
 
 				if ($file_mtime === false) {
-					self::fail($extension);
+					self::fail();
 				}
 
 				if ($file_mtime > $mtime) {
@@ -120,6 +120,12 @@ class Media {
 			}
 
 			$content = self::fetch('content', $request_string, $extension);
+
+			// If content is null, we don't handle this extension at all. It would be false if the
+			// file could not be found.
+			if ($content === null) {
+				return;
+			}
 		}
 
 		// .css files can contain URLs and need to be passed through our URL
@@ -137,7 +143,7 @@ class Media {
 	 * @access private
 	 */
 	private static function fail() {
-		HTTP\StatusCode::404('media');
+		HTTP\Status::code_404('media');
 	}
 
 	/**
@@ -146,6 +152,7 @@ class Media {
 	 * @access private
 	 * @param string $path
 	 * @param string $extension
+	 * @return mixed $content Returns a string with the content, or false if it couldn't be found
 	 */
 	private static function fetch($type, $path, $extension) {
 		foreach (self::$filetypes as $filetype => $extensions) {
@@ -167,6 +174,8 @@ class Media {
 				}
 			}
 		}
+
+		return null;
 	}
 
 	/**
