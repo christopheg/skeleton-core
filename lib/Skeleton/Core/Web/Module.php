@@ -32,24 +32,15 @@ abstract class Module {
 	 * @access public
 	 */
 	public function accept_request() {
-		/**
-		 * Initialize sticky sessions
-		 */
-		Session_Sticky::clear(get_class($this));
-		$session = Session_Sticky::Get();
-		$session->module = get_class($this);
-
-		$application = \Skeleton\Core\Application::get();
-
 		// Bootstrap the application
+		$application = \Skeleton\Core\Application::get();
 		$application->bootstrap($this);
 
-		/**
-		 * Determine the template
-		 */
+		// Find the template and set it up
 		$template = \Skeleton\Core\Web\Template::Get();
 		$template->add_environment('module', $this);
 
+		// Call our magic secure() method before passing on the request
 		if (method_exists($this, 'secure')) {
 			$allowed = $this->secure();
 			if (!$allowed) {
@@ -67,6 +58,7 @@ abstract class Module {
 			}
 		}
 
+		// Find out which method to call, fall back to calling displa()
 		if (isset($_REQUEST['action']) AND method_exists($this, 'display_' . $_REQUEST['action'])) {
 			$template->assign('action', $_REQUEST['action']);
 			call_user_func([$this, 'display_'.$_REQUEST['action']]);
@@ -74,6 +66,7 @@ abstract class Module {
 			$this->display();
 		}
 
+		// If the module has defined a template, render it
 		if ($this->template !== null and $this->template !== false) {
 			$template->display($this->template);
 		}

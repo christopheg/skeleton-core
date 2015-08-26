@@ -26,4 +26,20 @@ class Config {
 	 * @var string $module_403
 	 */
 	public static $module_403 = null;
+
+	/**
+	 * Name of the session
+	 *
+	 * @access public
+	 * @var string $session_name
+	 */
+	public static $session_name = 'APP';
+
+	/**
+	 * Name of the variable to store the sticky session object in
+	 *
+	 * @access public
+	 * @var string $sticky_session_namse
+	 */
+	public static $sticky_session_name = 'sys_sticky_session';
 }

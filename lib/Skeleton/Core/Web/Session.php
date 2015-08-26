@@ -11,12 +11,20 @@ namespace Skeleton\Core\Web;
 class Session {
 
 	/**
+	 * Sticky session variables
+	 *
+	 * @access private
+	 * @var array $sticky
+	 */
+	private static $sticky = null;
+
+	/**
 	 * Start the Session
 	 *
 	 * @access public
 	 */
 	public static function start() {
-		session_name('APP');
+		session_name(\Skeleton\Core\Config::$session_name);
 		session_start();
 	}
 
@@ -42,5 +50,33 @@ class Session {
 	 */
 	public static function destroy() {
 		session_destroy();
+	}
+
+	/**
+	 * Set a sticky session variable
+	 *
+	 * @access public
+	 * @param string $key
+	 * @param mixed $value
+	 */
+	public static function set_sticky($key, $value) {
+		if (self::$sticky === null) {
+			self::$sticky = new \Skeleton\Core\Web\Session\Sticky();
+		}
+
+		self::$sticky->$key = $value;
+	}
+
+	/*
+	 * Clear the current sticky sessions
+	 *
+	 * @access public
+	 */
+	public static function clear_sticky() {
+		if (self::$sticky === null) {
+			self::$sticky = new \Skeleton\Core\Web\Session\Sticky();
+		}
+
+		self::$sticky->clear();
 	}
 }
