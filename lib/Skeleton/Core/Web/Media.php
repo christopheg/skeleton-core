@@ -248,8 +248,7 @@ class Media {
 		if(isset($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
 			if ($_SERVER['HTTP_IF_MODIFIED_SINCE'] == $gmt_mtime) {
 				header('Expires: ');
-				header('HTTP/1.1 304 Not Modified');
-				exit;
+				HTTP\Status::code_304();
 			}
 		}
 

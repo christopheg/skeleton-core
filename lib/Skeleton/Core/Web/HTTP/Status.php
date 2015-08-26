@@ -8,11 +8,24 @@
 namespace Skeleton\Core\Web\HTTP;
 
 class Status {
+
+	/**
+	 * Send a 304 status
+	 *
+	 * @access public
+	 */
+	public static function code_304() {
+		header('HTTP/1.1 304 Not Modified', true);
+		echo '304 Not Modified';
+		exit();
+	}
+
 	/**
 	 * Throw a 403 error
 	 *
 	 * @access public
 	 * @param string $message An additional message to add to the error
+	 * @param bool
 	 */
 	public static function code_403($message = null, $exit = true) {
 		if ($message !== null) {
