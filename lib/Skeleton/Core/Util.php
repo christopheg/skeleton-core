@@ -27,7 +27,7 @@ class Util {
 					return $matches[0];
 				}
 
-				$uri = Util::rewrite_reverse_link($matches[3]);
+				$uri = Util::rewrite_reverse($matches[3]);
 				return str_replace('/' . $matches[3], $uri, $matches[0]);
 			},
 			$html
@@ -47,7 +47,7 @@ class Util {
 		$css = preg_replace_callback(
 			'/url\((?P<url>.*?)\)/i',
 			function ($matches) {
-				return 'url(' . self::rewrite_reverse_link(str_replace('../', '', $matches['url'])) . ')';
+				return 'url(' . self::rewrite_reverse(str_replace('../', '', $matches['url'])) . ')';
 			},
 			$css
 		);
@@ -62,15 +62,17 @@ class Util {
 	 * @param string $url
 	 * @return string $reverse_rewrite
 	 */
-	public static function rewrite_reverse_link($url) {
+	public static function rewrite_reverse($url) {
 		$application = Application::Get();
 
-		$url = Util::rewrite_reverse_link_routes($url);
+		$url = Util::rewrite_reverse_routes($url);
 		if (isset($application->config->base_uri) and $application->config->base_uri !== null) {
 			$url = trim($application->config->base_uri, '/') . '/' . trim($url, '/');
-			if (strpos($url, '/') !== 0) {
-				$url = '/' . $url;
-			}
+		}
+
+		// We don't support relative URIs at all
+		if (strpos($url, '/') !== 0) {
+			$url = '/' . $url;
 		}
 
 		return $url;
@@ -83,7 +85,7 @@ class Util {
 	 * @param string $url_raw
 	 * @return string $reverse_rewrite
 	 */
-	private static function rewrite_reverse_link_routes($url_raw) {
+	private static function rewrite_reverse_routes($url_raw) {
 		$url = parse_url($url_raw);
 
 		$params = [];

@@ -131,7 +131,10 @@ class Media {
 		// .css files can contain URLs and need to be passed through our URL
 		// rewrite method
 		if (self::get_mime_type($extension) == 'text/css') {
-			$content = \Skeleton\Core\Util::rewrite_reverse_css($content);
+			// FIXME: this has been disabled for now, but it needs to be fixed.
+			// Only CSS files that have been fetched from the application's
+			// asset directory should be rewritten.
+			//$content = \Skeleton\Core\Util::rewrite_reverse_css($content);
 		}
 
 		self::output($extension, $content, $mtime);
@@ -150,28 +153,31 @@ class Media {
 	 * Fetch the contents and mtime of a file
 	 *
 	 * @access private
+	 * @param string $type
 	 * @param string $path
 	 * @param string $extension
-	 * @return mixed $content Returns a string with the content, or false if it couldn't be found
+	 * @return mixed $content Returns a string with the content, false if it
+	 *  couldn't be found or null if it shouldn't be handled by us anyway
 	 */
 	private static function fetch($type, $path, $extension) {
 		foreach (self::$filetypes as $filetype => $extensions) {
 			if (in_array($extension, $extensions)) {
-				if (file_exists(Application::Get()->media_path . '/' . $filetype . '/' . $path)) {
-					if ($type == 'mtime') {
-						return filemtime(Application::Get()->media_path . '/' . $filetype . '/' . $path);
-					} else {
-						return file_get_contents(Application::Get()->media_path . '/' . $filetype . '/' . $path);
+				$filepaths = [
+					\Skeleton\Core\Config::$asset_dir . '/' . $path, // Global asset directory
+					Application::get()->media_path . '/' . $filetype . '/' . $path, // Application asset directory
+				];
+
+				foreach ($filepaths as $filepath) {
+					if (file_exists($filepath)) {
+						if ($type == 'mtime') {
+							return filemtime($filepath);
+						} else {
+							return file_get_contents($filepath);
+						}
 					}
-				} else if ((file_exists(Application::Get()->media_path . '/tools/' . $path))) {
-					if ($type == 'mtime') {
-						return filemtime(Application::Get()->media_path . '/tools/' . $path);
-					} else {
-						return file_get_contents(Application::Get()->media_path . '/tools/' . $path);
-					}
-				} else {
-					return false;
 				}
+
+				return false;
 			}
 		}
 

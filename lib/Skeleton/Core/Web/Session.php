@@ -35,7 +35,7 @@ class Session {
 	 */
 	public static function redirect($url) {
 		try {
-			$url = \Skeleton\Core\Util::rewrite_reverse_link($url);
+			$url = \Skeleton\Core\Util::rewrite_reverse($url);
 		} catch (\Exception $e) { }
 
 		header('Location: '.$url);

@@ -20,6 +20,17 @@ class Config {
 	public static $application_dir = null;
 
 	/**
+	 * Asset directory
+	 *
+	 * A directory which will be searched for media failes in addition to the
+	 * application's media path
+	 *
+	 * @access public
+	 * @var string $asset_dir
+	 */
+	public static $asset_dir = null;
+
+	/**
 	 * Name of the module that handles 403 errors
 	 *
 	 * @access public
