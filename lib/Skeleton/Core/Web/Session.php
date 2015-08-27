@@ -32,11 +32,16 @@ class Session {
 	 * Redirect to
 	 *
 	 * @access public
+	 * @param string $url
+	 * @param bool $rewrite
 	 */
-	public static function redirect($url) {
-		try {
-			$url = \Skeleton\Core\Util::rewrite_reverse($url);
-		} catch (\Exception $e) { }
+	public static function redirect($url, $rewrite = true) {
+		if ($rewrite) {
+			// TODO: I don't actually know why there is a try/catch around this?
+			try {
+				$url = \Skeleton\Core\Util::rewrite_reverse($url);
+			} catch (\Exception $e) { }
+		}
 
 		header('Location: '.$url);
 		echo 'Redirecting to : '.$url;
