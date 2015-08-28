@@ -9,6 +9,7 @@
 
 namespace Skeleton\Core\Web;
 
+use Skeleton\Core\Hook;
 use Skeleton\Core\Application;
 use Skeleton\I18n\Language;
 use Skeleton\Database\Database;
@@ -80,17 +81,6 @@ class Handler {
 		Media::detect($application->request_relative_uri);
 
 		/**
-		 * Find the module to load
-		 */
-		try {
-			// Attempt to find the module by matching defined routes
-			$module = $application->route($request_uri);
-		} catch (\Exception $e) {
-			// Attempt to find a module by matching paths
-			$module = Module::get($application->request_relative_uri);
-		}
-
-		/**
 		 * Set language
 		 */
 		// Set the language to something sensible if it isn't set yet
@@ -120,8 +110,33 @@ class Handler {
 				$_SESSION['language'] = Language::get_by_name_short($application->config->default_language);
 			}
 		}
+
 		$application->language = $_SESSION['language'];
 
-		$module->accept_request();
+		/**
+		 * Find the module to load
+		 *
+		 * FIXME: this nested try/catch is not the prettiest of things
+		 */
+		$module = null;
+		try {
+			// Attempt to find the module by matching defined routes
+			$module = $application->route($request_uri);
+		} catch (\Exception $e) {
+			try {
+				// Attempt to find a module by matching paths
+				$module = Module::get($application->request_relative_uri);
+			} catch (\Exception $e) {
+				if (Hook::exists('module_not_found')) {
+					Hook::call('module_not_found');
+				} else {
+					HTTP\Status::code_404('module');
+				}
+			}
+		}
+
+		if ($module !== null) {
+			$module->accept_request();
+		}
 	}
 }

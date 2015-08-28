@@ -199,42 +199,6 @@ class Application {
 	}
 
 	/**
-	 * Bootstrap the application
-	 *
-	 * @access public
-	 */
-	public function bootstrap(\Skeleton\Core\Web\Module $module) {
-		// FIXME: requiring the file and determining the classname should be
-		// generalised
-		if (file_exists($this->path . '/config/Hook.php')) {
-			require_once $this->path . '/config/Hook.php';
-			$classname = 'Hook_' . ucfirst($this->name);
-
-			if (method_exists($classname, 'bootstrap')) {
-				$classname::bootstrap($module);
-			}
-		}
-	}
-
-	/**
-	 * Tear down the application
-	 *
-	 * @access public
-	 */
-	public function teardown(\Skeleton\Core\Web\Module $module) {
-		// FIXME: requiring the file and determining the classname should be
-		// generalised
-		if (file_exists($this->path . '/config/Hook.php')) {
-			require_once $this->path . '/config/Hook.php';
-			$classname = 'Hook_' . ucfirst($this->name);
-
-			if (method_exists($classname, 'teardown')) {
-				$classname::teardown($module);
-			}
-		}
-	}
-
-	/**
 	 * Get
 	 *
 	 * Try to fetch the current application
