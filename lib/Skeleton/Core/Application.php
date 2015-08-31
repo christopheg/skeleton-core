@@ -279,7 +279,7 @@ class Application {
 		// Set required variables in the matched Application objects
 		foreach ($matched_applications as $key => $application) {
 			 // Set the relative request URI according to the application
-			if (isset($application->config->base_uri)) {
+			if (isset($application->config->base_uri) and ($application->config->base_uri !== '/')) {
 				$application->request_relative_uri = str_replace($application->config->base_uri, '', $request_uri);
 			} else {
 				$application->request_relative_uri = $request_uri;
