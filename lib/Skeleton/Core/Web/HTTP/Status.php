@@ -16,7 +16,6 @@ class Status {
 	 */
 	public static function code_304() {
 		header('HTTP/1.1 304 Not Modified', true);
-		echo '304 Not Modified';
 		exit();
 	}
 
