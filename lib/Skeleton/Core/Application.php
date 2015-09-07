@@ -208,7 +208,7 @@ class Application {
 	 */
 	public static function get() {
 		if (self::$application === null) {
-			throw new Exception('No application set');
+			throw new \Exception('No application set');
 		}
 
 		return self::$application;
