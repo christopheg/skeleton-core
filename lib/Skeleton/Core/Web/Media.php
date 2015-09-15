@@ -34,6 +34,7 @@ class Media {
 		],
 		'font' => [
 			'woff',
+			'woff2',			
 			'ttf',
 			'otf',
 			'eot'
