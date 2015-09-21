@@ -111,6 +111,9 @@ class Application {
 		if ($request_uri[0] == '/') {
 			$request_uri = substr($request_uri, 1);
 		}
+		if (substr($request_uri, -1) == '/') {
+			$request_uri = substr($request_uri, 0, strlen($request_uri)-1);
+		}
 
 		$request_parts = explode('/', $request_uri);
 		$routes = $this->config->routes;
