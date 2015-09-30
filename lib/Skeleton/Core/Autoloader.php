@@ -111,7 +111,7 @@ class Autoloader {
 	 * @return void
 	 */
 	public function load_class($class_name) {
-		$file_path = str_replace(' ', '/', ucwords(str_replace('_', ' ', $class_name))) . '.php';
+		$file_path = str_replace(' ', '/', ucwords(str_replace('_', ' ', str_replace('\\', '/', $class_name)))) . '.php';
 
 		foreach ($this->include_paths as $include_path) {
 			$path = $include_path . '/' . $file_path;
