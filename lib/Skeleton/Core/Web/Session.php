@@ -71,17 +71,4 @@ class Session {
 
 		self::$sticky->$key = $value;
 	}
-
-	/*
-	 * Clear the current sticky sessions
-	 *
-	 * @access public
-	 */
-	public static function clear_sticky() {
-		if (self::$sticky === null) {
-			self::$sticky = new \Skeleton\Core\Web\Session\Sticky();
-		}
-
-		self::$sticky->clear();
-	}
 }

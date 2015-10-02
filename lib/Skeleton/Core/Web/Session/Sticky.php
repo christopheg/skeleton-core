@@ -12,12 +12,31 @@ namespace Skeleton\Core\Web\Session;
 use Skeleton\Core\Config;
 
 class Sticky {
-	private $variables = [];
 
+	/**
+	 * Session object
+	 *
+	 * @access private
+	 * @var Web_Session $session
+	 */
+	private static $sticky_session = null;
+
+	/**
+	 * Module
+	 *
+	 * @var string $module
+	 * @access private
+	 */
+	public $module = null;
+
+	/**
+	 * Contructor
+	 *
+	 * @access private
+	 * @param string $username
+	 * @param string $password
+	 */
 	public function __construct() {
-		if (isset($_SESSION[Config::$sticky_session_name])) {
-			$this->variables = $_SESSION[Config::$sticky_session_name];
-		}
 	}
 
 	/**
@@ -31,8 +50,7 @@ class Sticky {
 		if (!isset($_SESSION[Config::$sticky_session_name])) {
 			$_SESSION[Config::$sticky_session_name] = [];
 		}
-
-		$_SESSION[Config::$sticky_session_name][$key] = $value;
+		$_SESSION[Config::$sticky_session_name][$key] = ['counter' => 0, 'data' => $value];
 	}
 
 	/**
@@ -40,13 +58,13 @@ class Sticky {
 	 *
 	 * @access public
 	 * @param string $key
+	 * @param bool $remove_after_get
 	 */
 	public function __get($key) {
-		if (!isset($this->variables[$key])) {
-			throw new \Exception('Key "' . $key . '"" not found');
+		if (!isset($_SESSION[Config::$sticky_session_name][$key])) {
+			throw new Exception('Key not found');
 		}
-
-		return $this->variables[$key];
+		return $_SESSION[Config::$sticky_session_name][$key]['data'];
 	}
 
 	/**
@@ -56,7 +74,7 @@ class Sticky {
 	 * @param string $key
 	 */
 	public function __isset($key) {
-		if (!isset($this->variables[$key])) {
+		if (!isset($_SESSION[Config::$sticky_session_name][$key])) {
 			return false;
 		} else {
 			return true;
@@ -64,15 +82,59 @@ class Sticky {
 	}
 
 	/**
+	 * Unset
+	 *
+	 * @access public
+	 * @param string $key
+	 */
+	public function __unset($key) {
+		unset($_SESSION[Config::$sticky_session_name][$key]);
+	}
+
+	/**
+	 * Get as array
+	 *
+	 * @access public
+	 * @return array $variables
+	 */
+	public function get_as_array() {
+		$variables = [];
+		foreach ($_SESSION[Config::$sticky_session_name] as $key => $data) {
+			$variables[$key] = $data['data'];
+		}
+		return $variables;
+	}
+
+	/**
+	 * Get a Session object
+	 *
+	 * @access public
+	 * @return Session
+	 */
+	public static function get() {
+		if (self::$sticky_session === null) {
+			self::$sticky_session = new self();
+		}
+		return self::$sticky_session;
+	}
+
+	/**
 	 * Sticky clear
 	 *
 	 * @access public
+	 * @param string $module
 	 */
-	public static function clear() {
+	public static function cleanup() {
 		if (!isset($_SESSION[Config::$sticky_session_name])) {
 			return;
 		}
 
-		unset($_SESSION[Config::$sticky_session_name]);
+		foreach ($_SESSION[Config::$sticky_session_name] as $key => $variables) {
+			if (isset($variables['counter']) and $variables['counter'] < 1) {
+				$_SESSION[Config::$sticky_session_name][$key]['counter']++;
+				continue;
+			}
+			unset($_SESSION[Config::$sticky_session_name][$key]);
+		}
 	}
 }

@@ -33,6 +33,12 @@ abstract class Module {
 	 * @access public
 	 */
 	public function accept_request() {
+		/**
+		 * Cleanup sticky session
+		 */
+		\Skeleton\Core\Web\Session\Sticky::cleanup();
+		$sticky = \Skeleton\Core\Web\Session\Sticky::Get();
+
 		// Bootstrap the application
 		$application = \Skeleton\Core\Application::get();
 
@@ -42,6 +48,7 @@ abstract class Module {
 		// Find the template and set it up
 		$template = \Skeleton\Core\Web\Template::Get();
 		$template->add_environment('module', $this);
+		$template->add_environment('sticky_session', $sticky->get_as_array());
 
 		// Call our magic secure() method before passing on the request
 		$allowed = true;
