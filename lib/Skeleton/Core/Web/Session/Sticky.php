@@ -99,6 +99,9 @@ class Sticky {
 	 */
 	public function get_as_array() {
 		$variables = [];
+		if (!isset($_SESSION[Config::$sticky_session_name])) {
+			return [];
+		}
 		foreach ($_SESSION[Config::$sticky_session_name] as $key => $data) {
 			$variables[$key] = $data['data'];
 		}
