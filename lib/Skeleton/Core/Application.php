@@ -297,6 +297,10 @@ class Application {
 		$matched_applications_sorted = [];
 		foreach ($matched_applications as $application) {
 			if (isset($application->config->base_uri)) {
+				// base_uri should not be empty, default to '/'
+				if ($application->config->base_uri == '') {
+					$application->config->base_uri = '/';
+				}
 				if (strpos($request_uri, $application->config->base_uri) === 0) {
 					$matched_applications_sorted[strlen($application->config->base_uri)] = $application;
 				}
