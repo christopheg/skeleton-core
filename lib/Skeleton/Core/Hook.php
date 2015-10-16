@@ -15,6 +15,7 @@ class Hook {
 	private static $definable_hooks = [
 		'bootstrap',
 		'teardown',
+		'handle_error',
 		'module_access_denied',
 		'module_not_found',
 	];
