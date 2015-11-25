@@ -31,6 +31,14 @@ class Config {
 	public static $asset_dir = null;
 
 	/**
+	 * Temp directory
+	 *
+	 * @access public
+	 * @var string $tmp_dir
+	 */
+	public static $tmp_dir = null;
+
+	/**
 	 * Name of the module that handles 403 errors
 	 *
 	 * @access public
