@@ -194,7 +194,7 @@ class Application {
 		if (file_exists($filepath)) {
 			require_once $filepath;
 		} else {
-			throw new Exception('Could not find file: ' . $filepath);
+			throw new \Exception('Could not find file: ' . $filepath);
 		}
 
 		$module = new $matched_module();
@@ -319,7 +319,7 @@ class Application {
 			return Application::get();
 		}
 
-		throw new Exception('No application found for ' . $hostname);
+		throw new \Exception('No application found for ' . $hostname);
 	}
 
 	/**
@@ -376,6 +376,6 @@ class Application {
 			}
 		}
 
-		throw new Exception('Application ' . $name . ' does not exists.');
+		throw new \Exception('Application ' . $name . ' does not exists.');
 	}
 }
