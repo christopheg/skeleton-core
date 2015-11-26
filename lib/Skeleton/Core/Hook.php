@@ -4,6 +4,7 @@
  *
  * @author Gerry Demaret <gerry@tigron.be>
  * @author Christophe Gosiau <christophe@tigron.be>
+ * @author David Vandemaele <david@tigron.be>
  */
 
  namespace Skeleton\Core;
@@ -18,6 +19,7 @@ class Hook {
 		'handle_error',
 		'module_access_denied',
 		'module_not_found',
+		'media_not_found',
 	];
 
 	/**

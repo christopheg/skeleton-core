@@ -34,7 +34,7 @@ class Media {
 		],
 		'font' => [
 			'woff',
-			'woff2',			
+			'woff2',
 			'ttf',
 			'otf',
 			'eot'
@@ -147,7 +147,11 @@ class Media {
 	 * @access private
 	 */
 	private static function fail() {
-		HTTP\Status::code_404('media');
+		if (\Skeleton\Core\Hook::exists('media_not_found')) {
+			\Skeleton\Core\Hook::call('media_not_found');
+		} else {
+			HTTP\Status::code_404('media');
+		}
 	}
 
 	/**
