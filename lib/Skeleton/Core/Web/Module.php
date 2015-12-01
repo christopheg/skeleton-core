@@ -65,7 +65,7 @@ abstract class Module {
 				Hook::call('module_access_denied', [$this]);
 			} elseif ($module_403 !== null and file_exists($application->module_path . '/' . $module_403 . '.php')) {
 				require $application->module_path . '/' . $module_403 . '.php';
-				$classname = 'Web_Module_' . $module;
+				$classname = 'Web_Module_' . $module_403;
 				$module = new $classname;
 				$module->accept_request();
 			} else {
