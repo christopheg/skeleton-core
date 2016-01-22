@@ -81,6 +81,28 @@ class Handler {
 		Media::detect($application->request_relative_uri);
 
 		/**
+		 * Find the module to load
+		 *
+		 * FIXME: this nested try/catch is not the prettiest of things
+		 */
+		$module = null;
+		try {
+			// Attempt to find the module by matching defined routes
+			$module = $application->route($request_uri);
+		} catch (\Exception $e) {
+			try {
+				// Attempt to find a module by matching paths
+				$module = Module::get($application->request_relative_uri);
+			} catch (\Exception $e) {
+				if (Hook::exists('module_not_found')) {
+					Hook::call('module_not_found');
+				} else {
+					HTTP\Status::code_404('module');
+				}
+			}
+		}
+
+		/**
 		 * Set language
 		 */
 		// Set the language to something sensible if it isn't set yet
@@ -112,28 +134,6 @@ class Handler {
 		}
 
 		$application->language = $_SESSION['language'];
-
-		/**
-		 * Find the module to load
-		 *
-		 * FIXME: this nested try/catch is not the prettiest of things
-		 */
-		$module = null;
-		try {
-			// Attempt to find the module by matching defined routes
-			$module = $application->route($request_uri);
-		} catch (\Exception $e) {
-			try {
-				// Attempt to find a module by matching paths
-				$module = Module::get($application->request_relative_uri);
-			} catch (\Exception $e) {
-				if (Hook::exists('module_not_found')) {
-					Hook::call('module_not_found');
-				} else {
-					HTTP\Status::code_404('module');
-				}
-			}
-		}
 
 		if ($module !== null) {
 			$module->accept_request();
