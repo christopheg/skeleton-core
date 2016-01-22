@@ -174,7 +174,7 @@ class Application {
 		$parts = explode('/', $route);
 
 		foreach ($parts as $key => $value) {
-			if ($value[0] == '$') {
+			if (isset($value[0]) and $value[0] == '$') {
 				$value = substr($value, 1);
 				if (strpos($value, '[') !== false) {
 					$value = substr($value, 0, strpos($value, '['));
