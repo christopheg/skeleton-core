@@ -355,7 +355,13 @@ class Application {
 			$application->path = $app_path;
 			$application->name = $application_directory;
 			$application->config = $config;
-			$application->language = \Skeleton\I18n\Language::get_by_name_short($config->default_language);
+			if (isset(\Skeleton\I18n\Config::$language_interface)) {
+				$classname = \Skeleton\I18n\Config::$language_interface;
+				if (!class_exists($classname)) {
+					throw new \Exception('The language interface does not exists: ' . \Skeleton\I18n\Config::$language_interface);
+				}
+				$application->language = $classname::get_by_name_short($config->default_language);
+			}
 			$applications[] = $application;
 		}
 		return $applications;

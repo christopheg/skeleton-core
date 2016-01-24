@@ -106,34 +106,43 @@ class Handler {
 		 * Set language
 		 */
 		// Set the language to something sensible if it isn't set yet
-		if (!isset($_SESSION['language'])) {
-			if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
-				$languages = Language::get_all();
-
-				foreach ($languages as $language) {
-					if (strpos($_SERVER['HTTP_ACCEPT_LANGUAGE'], $language->name_short) !== false) {
-						$language = $language;
-						$_SESSION['language'] = $language;
-					}
-				}
+		if (isset(\Skeleton\I18n\Config::$language_interface)) {
+			$language_interface = \Skeleton\I18n\Config::$language_interface;
+			if (!class_exists($language_interface)) {
+				throw new \Exception('The language interface does not exists: ' . $language_interface);
 			}
 
 			if (!isset($_SESSION['language'])) {
-				$language = Language::get_by_name_short($application->config->default_language);
-				$_SESSION['language'] = $language;
+				if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
+					$languages = $language_interface::get_all();
+
+					foreach ($languages as $language) {
+						if (strpos($_SERVER['HTTP_ACCEPT_LANGUAGE'], $language->name_short) !== false) {
+							$language = $language;
+							$_SESSION['language'] = $language;
+						}
+					}
+				}
+
+				if (!isset($_SESSION['language'])) {
+					$language = $language_interface::get_by_name_short($application->config->default_language);
+					$_SESSION['language'] = $language;
+				}
 			}
+
+			if (isset($_GET['language'])) {
+				try {
+					$language = $language_interface::get_by_name_short($_GET['language']);
+					$_SESSION['language'] = $language;
+				} catch (\Exception $e) {
+					$_SESSION['language'] = $language_interface::get_by_name_short($application->config->default_language);
+				}
+			}
+
+			$application->language = $_SESSION['language'];
 		}
 
-		if (isset($_GET['language'])) {
-			try {
-				$language = Language::get_by_name_short($_GET['language']);
-				$_SESSION['language'] = $language;
-			} catch (Exception $e) {
-				$_SESSION['language'] = Language::get_by_name_short($application->config->default_language);
-			}
-		}
 
-		$application->language = $_SESSION['language'];
 
 		if ($module !== null) {
 			$module->accept_request();
