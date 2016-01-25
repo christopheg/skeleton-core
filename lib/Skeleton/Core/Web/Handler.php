@@ -138,7 +138,6 @@ class Handler {
 					$_SESSION['language'] = $language_interface::get_by_name_short($application->config->default_language);
 				}
 			}
-
 			$application->language = $_SESSION['language'];
 		}
 

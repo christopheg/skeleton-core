@@ -89,20 +89,22 @@ class Util {
 		$url = parse_url($url_raw);
 
 		$params = [];
-		if (isset($url['query'])) {
-			// Allow &amp; instead of &
-			$url['query'] = str_replace('&amp;', '&', $url['query']);
-			parse_str($url['query'], $params);
-		}
 
 		$application = \Skeleton\Core\Application::Get();
-		$language = $application->language;
 		$routes = $application->config->routes;
 
 		/**
 		 * Add language to the known parameters
 		 */
-		$params['language'] = $language->name_short;
+		if (isset($application->language)) {
+			$params['language'] = $application->language->name_short;
+		}
+
+		if (isset($url['query'])) {
+			// Allow &amp; instead of &
+			$url['query'] = str_replace('&amp;', '&', $url['query']);
+			parse_str($url['query'], $params);
+		}
 
 		/**
 		 * Search for the requested module
