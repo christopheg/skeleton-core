@@ -93,17 +93,17 @@ class Util {
 		$application = \Skeleton\Core\Application::Get();
 		$routes = $application->config->routes;
 
-		/**
-		 * Add language to the known parameters
-		 */
-		if (isset($application->language)) {
-			$params['language'] = $application->language->name_short;
-		}
-
 		if (isset($url['query'])) {
 			// Allow &amp; instead of &
 			$url['query'] = str_replace('&amp;', '&', $url['query']);
 			parse_str($url['query'], $params);
+		}
+
+		/**
+		 * Add language to the known parameters
+		 */
+		if (isset($application->language) AND !isset($params['language'])) {
+			$params['language'] = $application->language->name_short;
 		}
 
 		/**
