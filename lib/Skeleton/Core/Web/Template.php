@@ -77,6 +77,17 @@ class Template {
 	}
 
 	/**
+	 * Render a template
+	 *
+	 * @access public
+	 * @param string $template
+	 * @return string $rendered_template
+	 */
+	public function render($template) {
+		return \Skeleton\Core\Util::rewrite_reverse_html($this->template->render($template));
+	}
+
+	/**
 	 * Get function, returns Template object
 	 */
 	public static function Get() {
