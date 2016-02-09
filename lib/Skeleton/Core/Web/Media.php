@@ -165,13 +165,24 @@ class Media {
 	 *  couldn't be found or null if it shouldn't be handled by us anyway
 	 */
 	private static function fetch($type, $path, $extension) {
-		foreach (self::$filetypes as $filetype => $extensions) {
-			if (in_array($extension, $extensions)) {
-				$filepaths = [
-					\Skeleton\Core\Config::$asset_dir . '/' . $path, // Global asset directory
-					Application::get()->media_path . '/' . $filetype . '/' . $path, // Application asset directory
-				];
+		$packages = \Skeleton\Core\Package::get_all();
 
+		foreach (self::$filetypes as $filetype => $extensions) {
+			$filepaths = [
+				\Skeleton\Core\Config::$asset_dir . '/' . $path, // Global asset directory
+				Application::get()->media_path . '/' . $filetype . '/' . $path, // Application asset directory
+			];
+			foreach ($packages as $package) {
+				$path_parts = explode('/', $path);
+				if (!isset($path_parts[0]) or $path_parts[0] != $package->name) {
+					continue;
+				}
+				unset($path_parts[0]);
+				$package_path = $package->asset_path . '/' . $filetype . '/' . implode('/', $path_parts);
+				$filepaths[] = $package_path;
+			}
+
+			if (in_array($extension, $extensions)) {
 				foreach ($filepaths as $filepath) {
 					if (file_exists($filepath)) {
 						if ($type == 'mtime') {

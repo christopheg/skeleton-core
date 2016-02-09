@@ -115,15 +115,41 @@ class Util {
 		if ($url['path'] != '' AND $url['path'][0] == '/') {
 			$url['path'] = substr($url['path'], 1);
 		}
-		$module_name = 'web_module_' . str_replace('/', '_', $url['path']);
+
+		$module_name = null;
+
+		/**
+		 * Check skeleton packages
+		 */
+		$packages = \Skeleton\Core\Package::get_all();
+		foreach ($packages as $package) {
+			$parts = explode('/', $url['path']);
+
+			if (isset($parts[0]) AND $parts[0] == $package->name) {
+				unset($parts[0]);
+				$module_name = 'Skeleton\Package\Web\Module\\' . str_replace('_', '\\', implode('/', $parts));
+			}
+		}
+		if ($module_name === null) {
+			$module_name = 'web_module_' . str_replace('/', '_', $url['path']);
+		}
 
 		$module_defined = false;
+		$package_module = false;
 
 		if (isset($routes[$module_name])) {
 			$module_defined = true;
 		} elseif (isset($routes[$module_name . '_index'])) {
 			$module_name = $module_name . '_index';
 			$module_defined = true;
+		} else {
+			foreach ($routes as $classname => $dummy) {
+				if (class_exists($classname) and strtolower(get_parent_class($classname)) == strtolower($module_name)) {
+					$module_name = strtolower($classname);
+					$module_defined = true;
+					$package_module = true;
+				}
+			}
 		}
 
 		if (!$module_defined) {
@@ -196,20 +222,24 @@ class Util {
 			}
 		}
 
-		if ($correct_route === null) {
+
+		if ($correct_route === null and !$package_module) {
 			return $url_raw;
-		}
+		} elseif ($correct_route === null and $package_module) {
+			$module_name = str_replace('web_module_', '', $module_name);
+			$new_url = '/' . str_replace('_', '/', $module_name);
+		} else {
+			$new_url = '';
+			foreach ($correct_route as $url_part) {
+				if ($url_part[0] !== '$') {
+					$new_url .= '/' . $url_part;
+					continue;
+				}
 
-		$new_url = '';
-		foreach ($correct_route as $url_part) {
-			if ($url_part[0] !== '$') {
-				$new_url .= '/' . $url_part;
-				continue;
+				$url_part = substr($url_part, 1);
+				$new_url .= '/' . $params[$url_part];
+				unset($params[$url_part]);
 			}
-
-			$url_part = substr($url_part, 1);
-			$new_url .= '/' . $params[$url_part];
-			unset($params[$url_part]);
 		}
 
 		/**

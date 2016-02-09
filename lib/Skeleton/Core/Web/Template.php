@@ -41,7 +41,13 @@ class Template {
 	 */
 	public function __construct() {
 		$this->template = new \Skeleton\Template\Template();
-		$this->template->set_template_directory(\Skeleton\Core\Application::Get()->template_path);
+		$application = \Skeleton\Core\Application::Get();
+
+		$this->template->add_template_directory($application->template_path, $application->name);
+		$packages = \Skeleton\Core\Package::get_all();
+		foreach ($packages as $package) {
+			$this->template->add_template_directory($package->template_path, $package->name);
+		}
 	}
 
 	/**
