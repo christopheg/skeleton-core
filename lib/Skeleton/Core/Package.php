@@ -72,6 +72,7 @@ class Package {
 			$package->path = $composer_dir . '/tigron/' . $name;
 			$package->template_path = $composer_dir . '/tigron/' . $name . '/template';
 			$package->asset_path = $composer_dir . '/tigron/' . $name . '/media';
+			$package->migration_path = $composer_dir . '/tigron/' . $name . '/migration';
 
 			$packages[] = $package;
 		}
