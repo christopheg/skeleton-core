@@ -236,6 +236,7 @@ class Application {
 	 * @return Application $application
 	 */
 	public static function detect($hostname, $request_uri) {
+
 		// If we already have a cached application, return that one
 		if (self::$application !== null) {
 			return Application::get();

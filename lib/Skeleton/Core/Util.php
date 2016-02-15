@@ -66,6 +66,7 @@ class Util {
 		$application = Application::Get();
 
 		$url = Util::rewrite_reverse_routes($url);
+
 		if (isset($application->config->base_uri) and $application->config->base_uri !== null) {
 			$url = trim($application->config->base_uri, '/') . '/' . trim($url, '/');
 		}
@@ -127,9 +128,16 @@ class Util {
 
 			if (isset($parts[0]) AND $parts[0] == $package->name) {
 				unset($parts[0]);
-				$module_name = 'Skeleton\Package\Web\Module\\' . str_replace('_', '\\', implode('/', $parts));
+
+				$package_parts = explode('-', str_replace('skeleton-package-', '', $package->name));
+				foreach ($package_parts as $key => $package_part) {
+					$package_parts[$key] = ucfirst($package_part);
+				}
+
+				$module_name = 'Skeleton\Package\\' . implode('\\', $package_parts) . '\Web\Module\\' . str_replace('_', '\\', implode('/', $parts));
 			}
 		}
+
 		if ($module_name === null) {
 			$module_name = 'web_module_' . str_replace('/', '_', $url['path']);
 		}
