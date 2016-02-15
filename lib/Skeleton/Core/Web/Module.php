@@ -80,6 +80,20 @@ abstract class Module {
 	}
 
 	/**
+	 * get module_path
+	 *
+	 * @access public
+	 * @return string $path
+	 */
+	public function get_module_path() {
+		$reflection = new \ReflectionClass($this);
+		$application = Application::Get();
+		$path = '/' . str_replace($application->module_path, '', $reflection->getFileName());
+		$path = str_replace('.php', '', $path);
+		return $path;
+	}
+
+	/**
 	 * Handle the request
 	 *
 	 * @access public
