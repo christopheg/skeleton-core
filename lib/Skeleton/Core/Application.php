@@ -115,7 +115,11 @@ class Application {
 			$request_uri = substr($request_uri, 0, strlen($request_uri)-1);
 		}
 
+		if (strpos( '/' . $request_uri, $this->config->base_uri) === 0) {
+			$request_uri = substr($request_uri, strlen($this->config->base_uri)-1);
+		}
 		$request_parts = explode('/', $request_uri);
+
 		$routes = $this->config->routes;
 
 		/**
