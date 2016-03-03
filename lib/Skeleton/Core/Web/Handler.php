@@ -106,7 +106,7 @@ class Handler {
 		 * Set language
 		 */
 		// Set the language to something sensible if it isn't set yet
-		if (isset(\Skeleton\I18n\Config::$language_interface)) {
+		if (class_exists('\Skeleton\I18n\Config') AND isset(\Skeleton\I18n\Config::$language_interface)) {
 			$language_interface = \Skeleton\I18n\Config::$language_interface;
 			if (!class_exists($language_interface)) {
 				throw new \Exception('The language interface does not exists: ' . $language_interface);

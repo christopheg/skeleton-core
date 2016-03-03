@@ -365,7 +365,7 @@ class Application {
 			$application->path = $app_path;
 			$application->name = $application_directory;
 			$application->config = $config;
-			if (isset(\Skeleton\I18n\Config::$language_interface)) {
+			if (class_exists('\Skeleton\I18n\Config') AND isset(\Skeleton\I18n\Config::$language_interface)) {
 				$classname = \Skeleton\I18n\Config::$language_interface;
 				if (!class_exists($classname)) {
 					throw new \Exception('The language interface does not exists: ' . \Skeleton\I18n\Config::$language_interface);
