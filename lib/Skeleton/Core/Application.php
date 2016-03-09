@@ -111,8 +111,13 @@ class Application {
 		if ($request_uri[0] == '/') {
 			$request_uri = substr($request_uri, 1);
 		}
+
 		if (substr($request_uri, -1) == '/') {
 			$request_uri = substr($request_uri, 0, strlen($request_uri)-1);
+		}
+
+		if (!isset($this->config->base_uri)) {
+			$this->config->base_uri = '/';
 		}
 
 		if (strpos( '/' . $request_uri, $this->config->base_uri) === 0) {
@@ -360,7 +365,7 @@ class Application {
 			$application->path = $app_path;
 			$application->name = $application_directory;
 			$application->config = $config;
-			if (isset(\Skeleton\I18n\Config::$language_interface)) {
+			if (class_exists('\Skeleton\I18n\Config') AND isset(\Skeleton\I18n\Config::$language_interface)) {
 				$classname = \Skeleton\I18n\Config::$language_interface;
 				if (!class_exists($classname)) {
 					throw new \Exception('The language interface does not exists: ' . \Skeleton\I18n\Config::$language_interface);
