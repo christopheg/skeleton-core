@@ -88,7 +88,6 @@ class Util {
 	 */
 	private static function rewrite_reverse_routes($url_raw) {
 		$url = parse_url($url_raw);
-
 		$params = [];
 
 		$application = \Skeleton\Core\Application::Get();
@@ -128,19 +127,19 @@ class Util {
 
 			if (isset($parts[0]) AND $parts[0] == $package->name) {
 				unset($parts[0]);
-
 				$package_parts = explode('-', str_replace('skeleton-package-', '', $package->name));
 				foreach ($package_parts as $key => $package_part) {
 					$package_parts[$key] = ucfirst($package_part);
 				}
 
-				$module_name = 'Skeleton\Package\\' . implode('\\', $package_parts) . '\Web\Module\\' . str_replace('_', '\\', implode('/', $parts));
+				$module_name = '\Skeleton\Package\\' . implode('\\', $package_parts) . '\Web\Module\\' . str_replace('_', '\\', implode('/', $parts));
 			}
 		}
 
 		if ($module_name === null) {
 			$module_name = 'web_module_' . str_replace('/', '_', $url['path']);
 		}
+
 
 		$module_defined = false;
 		$package_module = false;
@@ -151,8 +150,24 @@ class Util {
 			$module_name = $module_name . '_index';
 			$module_defined = true;
 		} else {
+
 			foreach ($routes as $classname => $dummy) {
-				if (class_exists($classname) and strtolower(get_parent_class($classname)) == strtolower($module_name)) {
+				$application = Application::get();
+
+				$module_filename = str_replace('web_module_', '', $classname);
+				$filename_parts = explode('_', $module_filename);
+				$module_filename = '';
+				foreach ($filename_parts as $filename_part) {
+					$module_filename .= '/' . strtolower($filename_part);
+				}
+				$module_filename .= '.php';
+
+				$module_filename = $application->module_path . $module_filename;
+				if (file_exists($module_filename) and !class_exists($classname)) {
+					require_once $module_filename;
+				}
+
+				if (class_exists($classname) and (strtolower(get_parent_class($classname)) == strtolower($module_name) OR is_subclass_of($classname, $module_name))) {
 					$module_name = strtolower($classname);
 					$module_defined = true;
 					$package_module = true;
@@ -170,7 +185,6 @@ class Util {
 		foreach ($routes as $route) {
 			$route_parts = explode('/', $route);
 			$route_part_matches = 0;
-
 			foreach ($route_parts as $key => $route_part) {
 				if (trim($route_part) == '') {
 					unset($route_parts[$key]);
@@ -267,7 +281,6 @@ class Util {
 		if (isset($url['fragment'])) {
 			$new_url .= '#' . $url['fragment'];
 		}
-
 		return $new_url;
 	}
 }
