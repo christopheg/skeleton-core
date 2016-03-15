@@ -31,6 +31,7 @@ class Media {
 		],
 		'css' => [
 			'css',
+			'map',
 		],
 		'font' => [
 			'woff',
