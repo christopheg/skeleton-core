@@ -1,0 +1,94 @@
+<?php
+/**
+ * Skeleton Core Skeleton class
+ *
+ * @author Christophe Gosiau <christophe@tigron.be>
+ * @author Gerry Demaret <gerry@tigron.be>
+ */
+
+namespace Skeleton\Core;
+
+class Skeleton {
+
+	/**
+	 * Name
+	 *
+	 * @access public
+	 * @var string $name
+	 */
+	public $name = null;
+
+	/**
+	 * Path
+	 *
+	 * @access public
+	 * @var string $path
+	 */
+	public $path = null;
+
+	/**
+	 * Template path
+	 *
+	 * @access public
+	 * @var string $path
+	 */
+	public $template_path = null;
+
+	/**
+	 * Asset dir
+	 *
+	 * @access public
+	 * @var string $path
+	 */
+	public $asset_path = null;
+
+	/**
+	 * Package cache
+	 *
+	 * @access private
+	 * @var array $package_cache
+	 */
+	private static $skeleton_cache = null;
+
+	/**
+	 * Get all
+	 *
+	 * @access public
+	 * @return array $packages
+	 */
+	public static function get_all() {
+		if (self::$skeleton_cache === null) {
+			/**
+			 * Search for other Skeleton packages installed
+			 */
+			$composer_dir = realpath(__DIR__ . '/../../../../../');
+			$installed = file_get_contents($composer_dir . '/composer/installed.json');
+			$installed = json_decode($installed);
+
+			$skeletons = [];
+			foreach ($installed as $install) {
+				$package = $install->name;
+				list($vendor, $name) = explode('/', $package);
+				if ($vendor != 'tigron') {
+					continue;
+				}
+
+				if (strpos($name, 'skeleton-package') === 0) {
+					$skeleton = new Package();
+				} else {
+					$skeleton = new self();
+				}
+				$skeleton->name = $name;
+				$skeleton->path = $composer_dir . '/tigron/' . $name;
+				$skeleton->template_path = $composer_dir . '/tigron/' . $name . '/template';
+				$skeleton->asset_path = $composer_dir . '/tigron/' . $name . '/media';
+				$skeleton->migration_path = $composer_dir . '/tigron/' . $name . '/migration';
+
+				$skeletons[] = $skeleton;
+			}
+			self::$skeleton_cache = $skeletons;
+		}
+		return self::$skeleton_cache;
+	}
+
+}
