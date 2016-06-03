@@ -28,6 +28,7 @@ class Media {
 		],
 		'doc' => [
 			'pdf',
+			'txt',
 		],
 		'css' => [
 			'css',
@@ -251,7 +252,11 @@ class Media {
 			case 'jpg' :
 			case 'jpeg': $mime_type = 'image/jpeg';
 			             break;
+
 			case 'pdf' : $mime_type = 'application/pdf';
+						 break;
+
+			case 'txt' : $mime_type = 'text/plain';
 						 break;
 
 			default    : $mime_type = 'application/octet-stream';
