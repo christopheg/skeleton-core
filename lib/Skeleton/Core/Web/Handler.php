@@ -78,7 +78,9 @@ class Handler {
 		/**
 		 * Handle the media
 		 */
-		Media::detect($application->request_relative_uri);
+		if (isset($application->config->detect_media) AND $application->config->detect_media === true OR !isset($application->config->detect_media)) {
+			Media::detect($application->request_relative_uri);
+		}
 
 		/**
 		 * Find the module to load
