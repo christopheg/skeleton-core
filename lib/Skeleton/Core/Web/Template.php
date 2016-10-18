@@ -43,7 +43,9 @@ class Template {
 		$this->template = new \Skeleton\Template\Template();
 		$application = \Skeleton\Core\Application::Get();
 
-		$this->template->add_template_directory($application->template_path, $application->name);
+		if (file_exists($application->template_path)) {
+			$this->template->add_template_directory($application->template_path, $application->name);
+		}
 		$packages = \Skeleton\Core\Package::get_all();
 		foreach ($packages as $package) {
 			if (file_exists($package->template_path)) {
