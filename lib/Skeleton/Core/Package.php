@@ -20,7 +20,7 @@ class Package extends Skeleton {
 		$skeletons = parent::get_all();
 		$packages = [];
 		foreach ($skeletons as $skeleton) {
-			if (strpos($skeleton->name, 'skeleton-package') !== 0) {
+			if (strpos($skeleton->name, 'skeleton') !== 0) {
 				continue;
 			}
 			$packages[] = $skeleton;
