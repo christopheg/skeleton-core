@@ -29,6 +29,11 @@ class Autoloader {
 	private $include_paths = [];
 
 	/**
+	 * @var string $namespaces
+	 */
+	private $namespaces = [];
+
+	/**
 	 * @var string $namespace_separator
 	 */
 	private $namespace_separator = '\\';
@@ -72,6 +77,10 @@ class Autoloader {
 		return $this->include_paths;
 	}
 
+	public function add_namespace($namespace, $path) {
+		$this->namespaces[$namespace] = $path;
+	}
+
 	/**
 	 * Sets the file extension of class files in the namespace of this class loader.
 	 *
@@ -112,6 +121,14 @@ class Autoloader {
 	 */
 	public function load_class($class_name) {
 		$file_path = str_replace(' ', '/', ucwords(str_replace('_', ' ', str_replace('\\', ' ', strtolower($class_name))))) . '.php';
+
+		foreach ($this->namespaces as $namespace => $namespace_path) {
+			$path = $namespace_path . '/' . substr($file_path, strpos('/', $file_path));
+
+			if (file_exists($path)) {
+				require_once $path;
+			}
+		}
 
 		foreach ($this->include_paths as $include_path) {
 			$path = $include_path . '/' . $file_path;
