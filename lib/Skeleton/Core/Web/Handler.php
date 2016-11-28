@@ -28,11 +28,6 @@ class Handler {
 		mb_internal_encoding('utf-8');
 
 		/**
-		 * Start the session
-		 */
-		Session::start();
-
-		/**
 		 * Hide PHP powered by
 		 */
 		header('X-Powered-By: Me');
@@ -81,6 +76,11 @@ class Handler {
 		if (isset($application->config->detect_media) AND $application->config->detect_media === true OR !isset($application->config->detect_media)) {
 			Media::detect($application->request_relative_uri);
 		}
+
+		/**
+		 * Start the session
+		 */
+		Session::start();
 
 		/**
 		 * Find the module to load
