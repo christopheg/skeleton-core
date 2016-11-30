@@ -124,18 +124,42 @@ class Autoloader {
 
 		foreach ($this->namespaces as $namespace => $namespace_path) {
 			$path = $namespace_path . '/' . substr($file_path, strpos('/', $file_path));
-
-			if (file_exists($path)) {
-				require_once $path;
-			}
+			try {
+				$this->require_file($path);
+				class_parents($class_name, true);
+				return true;
+			} catch (\Exception $e) { }
 		}
 
 		foreach ($this->include_paths as $include_path) {
-			$path = $include_path . '/' . $file_path;
+			try {
+				$path = $include_path . '/' . $file_path;
+				$this->require_file($path);
+				class_parents($class_name, true);
+				return true;
+			} catch (\Exception $e) { }
+		}
+	}
 
-			if (file_exists($path)) {
-				require_once $path;
+	/**
+	 * Require a file
+	 *
+	 * @access private
+	 * @param string $path
+	 */
+	private function require_file($path) {
+		$path = realpath($path);
+		if (file_exists($path)) {
+			require_once $path;
+
+			if (function_exists('opcache_is_script_cached') and function_exists('opcache_compile_file')) {
+				if (!opcache_is_script_cached($path)) {
+					opcache_compile_file($path);
+				}
 			}
+			return true;
+		} else {
+			throw new \Exception('File not found');
 		}
 	}
 }
