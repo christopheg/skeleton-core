@@ -152,9 +152,14 @@ class Autoloader {
 		if (file_exists($path)) {
 			require_once $path;
 
-			if (function_exists('opcache_is_script_cached') and function_exists('opcache_compile_file')) {
-				if (!opcache_is_script_cached($path)) {
-					opcache_compile_file($path);
+			// Opcache compilation
+			$opcache_enabled = ini_get('opcache.enable');
+			$opcache_cli_enabled = ini_get('opcache.enable_cli');
+			if ( (php_sapi_name() == 'cli' and $opcache_cli_enabled) or (php_sapi_name() != 'cli' and $opcache_enabled)) {
+				if (function_exists('opcache_is_script_cached') and function_exists('opcache_compile_file')) {
+					if (!opcache_is_script_cached($path)) {
+						opcache_compile_file($path);
+					}
 				}
 			}
 			return true;
