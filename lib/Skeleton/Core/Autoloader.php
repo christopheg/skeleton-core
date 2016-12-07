@@ -64,8 +64,11 @@ class Autoloader {
 	 *
 	 * @param string $include_path
 	 */
-	public function add_include_path($include_path) {
-		$this->include_paths[] = $include_path;
+	public function add_include_path($include_path, $class_prefix = '') {
+		$this->include_paths[] = [
+			'include_path' => $include_path,
+			'class_prefix' => $class_prefix
+		];
 	}
 
 	/**
@@ -120,9 +123,8 @@ class Autoloader {
 	 * @return void
 	 */
 	public function load_class($class_name) {
-		$file_path = str_replace(' ', '/', ucwords(str_replace('_', ' ', str_replace('\\', ' ', strtolower($class_name))))) . '.php';
-
 		foreach ($this->namespaces as $namespace => $namespace_path) {
+			$file_path = str_replace(' ', '/', ucwords(str_replace('_', ' ', str_replace('\\', ' ', strtolower($class_name))))) . '.php';
 			$path = $namespace_path . '/' . substr($file_path, strpos('/', $file_path));
 			try {
 				$this->require_file($path);
@@ -132,12 +134,26 @@ class Autoloader {
 		}
 
 		foreach ($this->include_paths as $include_path) {
+			$file_path = str_replace(' ', '/', ucwords(str_replace('_', ' ', str_replace('\\', ' ', strtolower(str_replace($include_path['class_prefix'], '', $class_name)))))) . '.php';
+
 			try {
-				$path = $include_path . '/' . $file_path;
+				$path = $include_path['include_path'] . '/' . $file_path;
 				$this->require_file($path);
 				class_parents($class_name, true);
 				return true;
 			} catch (\Exception $e) { }
+
+			/**
+			 * If the file is not found, try with all lower case. This should be
+			 * improved with PSR loading techniques
+			 */
+			try {
+				$path = strtolower($include_path['include_path'] . '/' . $file_path);
+				$this->require_file($path);
+				class_parents($class_name, true);
+				return true;
+			} catch (\Exception $e) { }
+
 		}
 	}
 

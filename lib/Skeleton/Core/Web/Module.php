@@ -157,26 +157,26 @@ abstract class Module {
 
 		$relative_uri_parts = array_values(array_filter(explode('/', $request_relative_uri)));
 
-		$filename = trim($request_relative_uri, '/');
-		if (file_exists($application->module_path . '/' . $filename . '.php')) {
-			require $application->module_path . '/' . $filename . '.php';
-			$classname = 'Web_Module_' . implode('_', $relative_uri_parts);
-		} elseif (file_exists($application->module_path . '/' . $filename . '/' . $application->config->module_default . '.php')) {
-			require $application->module_path . '/' . $filename . '/' . $application->config->module_default . '.php';
 
-			if ($filename == '') {
-				$classname = 'Web_Module_' . $application->config->module_default;
-			} else {
-				$classname = 'Web_Module_' . implode('_', $relative_uri_parts) . '_' . $application->config->module_default;
+		$autoloader = new \Skeleton\Core\Autoloader();
+		$autoloader->add_include_path($application->module_path, 'Web_Module_');
+		$autoloader->register();
+
+		$classnames = [];
+		$classnames[] = 'Web_Module_' . implode('_', $relative_uri_parts);
+		$classnames[] = 'Web_Module_' . $application->config->module_default;
+		$classnames[] = 'Web_Module_' . implode('_', $relative_uri_parts) . '_' . $application->config->module_default;
+		try {
+			$classnames[] = 'Web_Module_' . $application->config->module_404;
+		} catch (\Exception $e) { }
+
+
+		foreach ($classnames as $classname) {
+			if (class_exists($classname)) {
+				return new $classname;
 			}
-		} elseif (file_exists($application->module_path . '/' . $application->config->module_404 . '.php')) {
-			require $application->module_path . '/' . $application->config->module_404 . '.php';
-			$classname = 'Web_Module_' . $application->config->module_404;
-		} else {
-			throw new \Exception('Module not found');
 		}
-
-		return new $classname;
+		throw new \Exception('Module not found');
 	}
 
 	/**
