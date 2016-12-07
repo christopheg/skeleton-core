@@ -118,61 +118,18 @@ class Util {
 
 		$module_name = null;
 
-		/**
-		 * Check skeleton packages
-		 */
-		$packages = \Skeleton\Core\Package::get_all();
-		foreach ($packages as $package) {
-			$parts = explode('/', $url['path']);
-
-			if (isset($parts[0]) AND $parts[0] == $package->name) {
-				unset($parts[0]);
-				$package_parts = explode('-', str_replace('skeleton-package-', '', $package->name));
-				foreach ($package_parts as $key => $package_part) {
-					$package_parts[$key] = ucfirst($package_part);
-				}
-
-				$module_name = '\Skeleton\Package\\' . implode('\\', $package_parts) . '\Web\Module\\' . str_replace('_', '\\', implode('/', $parts));
-			}
-		}
 
 		if ($module_name === null) {
 			$module_name = 'web_module_' . str_replace('/', '_', $url['path']);
 		}
 
-
 		$module_defined = false;
-		$package_module = false;
 
 		if (isset($routes[$module_name])) {
 			$module_defined = true;
 		} elseif (isset($routes[$module_name . '_index'])) {
 			$module_name = $module_name . '_index';
 			$module_defined = true;
-		} else {
-
-			foreach ($routes as $classname => $dummy) {
-				$application = Application::get();
-
-				$module_filename = str_replace('web_module_', '', $classname);
-				$filename_parts = explode('_', $module_filename);
-				$module_filename = '';
-				foreach ($filename_parts as $filename_part) {
-					$module_filename .= '/' . strtolower($filename_part);
-				}
-				$module_filename .= '.php';
-
-				$module_filename = $application->module_path . $module_filename;
-				if (file_exists($module_filename) and !class_exists($classname)) {
-					require_once $module_filename;
-				}
-
-				if (class_exists($classname) and (strtolower(get_parent_class($classname)) == strtolower($module_name) OR is_subclass_of($classname, $module_name))) {
-					$module_name = strtolower($classname);
-					$module_defined = true;
-					$package_module = true;
-				}
-			}
 		}
 
 		if (!$module_defined) {
@@ -245,11 +202,8 @@ class Util {
 		}
 
 
-		if ($correct_route === null and !$package_module) {
+		if ($correct_route === null) {
 			return $url_raw;
-		} elseif ($correct_route === null and $package_module) {
-			$module_name = str_replace('web_module_', '', $module_name);
-			$new_url = '/' . str_replace('_', '/', $module_name);
 		} else {
 			$new_url = '';
 			foreach ($correct_route as $url_part) {

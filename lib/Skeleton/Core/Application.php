@@ -193,21 +193,9 @@ class Application {
 			}
 		}
 
-		$filename = str_replace('web_module_', '', $matched_module);
-		$filename = str_replace('_', '/', $filename);
-		$filename = strtolower($filename);
-
-		$filepath = $this->module_path . '/' . $filename . '.php';
-
-		// Check if the file exists before actually requiring it
-		if (file_exists($filepath)) {
-			require_once $filepath;
-		} else {
-			throw new \Exception('Could not find file: ' . $filepath);
-		}
-
-		$module = new $matched_module();
-		return $module;
+		$request_relative_uri = str_replace('web_module_', '', $matched_module);
+		$request_relative_uri = str_replace('_', '/', $request_relative_uri);
+		return \Skeleton\Core\Web\Module::get($request_relative_uri);
 	}
 
 	/**

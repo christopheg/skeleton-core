@@ -154,9 +154,7 @@ abstract class Module {
 	 */
 	public static function get($request_relative_uri) {
 		$application = \Skeleton\Core\Application::get();
-
 		$relative_uri_parts = array_values(array_filter(explode('/', $request_relative_uri)));
-
 
 		$autoloader = new \Skeleton\Core\Autoloader();
 		$autoloader->add_include_path($application->module_path, 'Web_Module_');
@@ -166,6 +164,7 @@ abstract class Module {
 		$classnames[] = 'Web_Module_' . implode('_', $relative_uri_parts);
 		$classnames[] = 'Web_Module_' . $application->config->module_default;
 		$classnames[] = 'Web_Module_' . implode('_', $relative_uri_parts) . '_' . $application->config->module_default;
+
 		try {
 			$classnames[] = 'Web_Module_' . $application->config->module_404;
 		} catch (\Exception $e) { }
