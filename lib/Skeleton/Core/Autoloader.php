@@ -64,11 +64,8 @@ class Autoloader {
 	 *
 	 * @param string $include_path
 	 */
-	public function add_include_path($include_path, $class_prefix = '') {
-		$this->include_paths[] = [
-			'include_path' => $include_path,
-			'class_prefix' => $class_prefix
-		];
+	public function add_include_path($include_path) {
+		$this->include_paths[] = $include_path;
 	}
 
 	/**
@@ -123,8 +120,9 @@ class Autoloader {
 	 * @return void
 	 */
 	public function load_class($class_name) {
+		$file_path = str_replace(' ', '/', ucwords(str_replace('_', ' ', str_replace('\\', ' ', strtolower($class_name))))) . '.php';
+
 		foreach ($this->namespaces as $namespace => $namespace_path) {
-			$file_path = str_replace(' ', '/', ucwords(str_replace('_', ' ', str_replace('\\', ' ', strtolower($class_name))))) . '.php';
 			$path = $namespace_path . '/' . substr($file_path, strpos('/', $file_path));
 			try {
 				$this->require_file($path);
@@ -134,26 +132,12 @@ class Autoloader {
 		}
 
 		foreach ($this->include_paths as $include_path) {
-			$file_path = str_replace(' ', '/', ucwords(str_replace('_', ' ', str_replace('\\', ' ', strtolower(str_replace($include_path['class_prefix'], '', $class_name)))))) . '.php';
-
 			try {
-				$path = $include_path['include_path'] . '/' . $file_path;
+				$path = $include_path . '/' . $file_path;
 				$this->require_file($path);
 				class_parents($class_name, true);
 				return true;
 			} catch (\Exception $e) { }
-
-			/**
-			 * If the file is not found, try with all lower case. This should be
-			 * improved with PSR loading techniques
-			 */
-			try {
-				$path = strtolower($include_path['include_path'] . '/' . $file_path);
-				$this->require_file($path);
-				class_parents($class_name, true);
-				return true;
-			} catch (\Exception $e) { }
-
 		}
 	}
 
@@ -168,16 +152,25 @@ class Autoloader {
 		if (file_exists($path)) {
 			require_once $path;
 
+
 			// Opcache compilation
 			$opcache_enabled = ini_get('opcache.enable');
 			$opcache_cli_enabled = ini_get('opcache.enable_cli');
 			if ( (php_sapi_name() == 'cli' and $opcache_cli_enabled) or (php_sapi_name() != 'cli' and $opcache_enabled)) {
 				if (function_exists('opcache_is_script_cached') and function_exists('opcache_compile_file')) {
 					if (!opcache_is_script_cached($path)) {
-						opcache_compile_file($path);
+						// We have noticed OPcache sometimes yields a warning when compiling a file,
+						// while that exact same file compiled just fine moments earlier. Worse, it
+						// seems the OPcache for said file becomes corrupt somehow. This might
+						// be a bug somewhere. We'll try to work around this issue by suppressing the
+						// warning and explicitly invalidate the cache for the file if compilation fails.
+						if (@opcache_compile_file($path) === false) {
+							opcache_invalidate($path, true);
+						}
 					}
 				}
 			}
+
 			return true;
 		} else {
 			throw new \Exception('File not found');
