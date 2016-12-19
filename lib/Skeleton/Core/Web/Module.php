@@ -161,14 +161,12 @@ abstract class Module {
 		$autoloader->register();
 
 		$classnames = [];
-		$classnames[] = 'Web_Module_' . implode('_', $relative_uri_parts);
-		$classnames[] = 'Web_Module_' . $application->config->module_default;
-		$classnames[] = 'Web_Module_' . implode('_', $relative_uri_parts) . '_' . $application->config->module_default;
+		$classnames[] = trim('Web_Module_' . implode('_', $relative_uri_parts), '_');
+		$classnames[] = trim('Web_Module_' . implode('_', $relative_uri_parts), '_') . '_' . $application->config->module_default;
 
 		try {
 			$classnames[] = 'Web_Module_' . $application->config->module_404;
 		} catch (\Exception $e) { }
-
 
 		foreach ($classnames as $classname) {
 			if (class_exists($classname)) {
