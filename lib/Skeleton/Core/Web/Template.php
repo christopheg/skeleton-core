@@ -91,11 +91,16 @@ class Template {
 	 *
 	 * @access public
 	 * @param string $template
+	 * @param bool $rewrite_html
 	 * @return string $rendered_template
 	 */
-	public function render($template) {
-		return \Skeleton\Core\Util::rewrite_reverse_html($this->template->render($template));
-	}
+	 public function render($template, $rewrite_html = true) {
+ 		if ($rewrite_html) {
+ 			return \Skeleton\Core\Util::rewrite_reverse_html($this->template->render($template));
+ 		} else {
+ 			return $this->template->render($template);
+ 		}
+ 	}
 
 	/**
 	 * Get function, returns Template object
