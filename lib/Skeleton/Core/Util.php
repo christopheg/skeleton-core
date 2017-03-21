@@ -139,9 +139,12 @@ class Util {
 		$routes = $routes[$module_name];
 
 		$correct_route = null;
+		$correct_route_params_matches = 0;
+
 		foreach ($routes as $route) {
 			$route_parts = explode('/', $route);
 			$route_part_matches = 0;
+			$params_matches = 0;
 			foreach ($route_parts as $key => $route_part) {
 				if (trim($route_part) == '') {
 					unset($route_parts[$key]);
@@ -176,6 +179,7 @@ class Util {
 					 */
 					if (count($required_values) == 0) {
 						$route_part_matches++;
+						$params_matches++;
 						continue;
 					}
 
@@ -191,16 +195,18 @@ class Util {
 
 					if ($values_ok) {
 						$route_part_matches++;
+						$params_matches++;
 						continue;
 					}
 				}
 			}
 
-			if ($route_part_matches == count($route_parts)) {
+
+			if ($route_part_matches == count($route_parts) AND $route_part_matches > $correct_route_params_matches) {
 				$correct_route = $route_parts;
+				$correct_route_params_matches = $route_part_matches;
 			}
 		}
-
 
 		if ($correct_route === null) {
 			return $url_raw;
@@ -217,6 +223,11 @@ class Util {
 				unset($params[$url_part]);
 			}
 		}
+
+		/**
+		 * Language param was added earlier. Remove it. It should not be included if it was not part of the route
+		 */
+		unset($params['language']);
 
 		/**
 		 * If the first character is a /, remove it
