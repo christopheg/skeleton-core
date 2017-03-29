@@ -140,7 +140,6 @@ class Application {
 					$uri = substr($uri, 1);
 				}
 				$parts = explode('/', $uri);
-
 				$matches_fixed_parts = 0;
 				$match = true;
 
@@ -156,11 +155,34 @@ class Application {
 					}
 
 					if (isset($value[0]) AND $value[0] == '$') {
+						preg_match_all('/(\[(.*?)\])/', $value, $matches);
+						if (!isset($matches[2][0])) {
+							/**
+							 *  There are no possible values for the variable
+							 *  The match is valid
+							 */
+							 continue;
+						}
+
+						$possible_values = explode(',', $matches[2][0]);
+
+						$variable_matches = false;
+						foreach ($possible_values as $possible_value) {
+							if ($request_parts[$key] == $possible_value) {
+								$variable_matches = true;
+							}
+						}
+
+						if (!$variable_matches) {
+							$match = false;
+						}
+
 						// This is a variable, we do not increase the fixed parts
 						continue;
 					}
 					$match = false;
 				}
+
 
 				if ($match and count($parts) == count($request_parts)) {
 					if ($matches_fixed_parts >= $best_matches_fixed_parts) {
