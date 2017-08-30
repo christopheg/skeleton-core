@@ -128,8 +128,11 @@ class Autoloader {
 			$path = $namespace_path . '/' . substr($file_path, strpos('/', $file_path));
 			try {
 				$this->require_file($path);
-				class_parents($class_name, true);
-				return true;
+
+				if (class_exists($class_name, false)) {
+					class_parents($class_name, true);
+					return true;
+				}
 			} catch (\Exception $e) { }
 		}
 
@@ -139,8 +142,11 @@ class Autoloader {
 			try {
 				$path = $include_path['include_path'] . '/' . $file_path;
 				$this->require_file($path);
-				class_parents($class_name, true);
-				return true;
+
+				if (class_exists($class_name, false)) {
+					class_parents($class_name, true);
+					return true;
+				}
 			} catch (\Exception $e) { }
 
 			/**
@@ -150,8 +156,11 @@ class Autoloader {
 			try {
 				$path = strtolower($include_path['include_path'] . '/' . $file_path);
 				$this->require_file($path);
-				class_parents($class_name, true);
-				return true;
+
+				if (class_exists($class_name, false)) {
+					class_parents($class_name, true);
+					return true;
+				}
 			} catch (\Exception $e) { }
 
 		}
