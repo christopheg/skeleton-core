@@ -44,8 +44,9 @@ class Template {
 		$application = \Skeleton\Core\Application::Get();
 
 		if (file_exists($application->template_path)) {
-			$this->template->add_template_directory($application->template_path, $application->name);
+			$this->template->add_template_directory($application->template_path);
 		}
+
 		$packages = \Skeleton\Core\Package::get_all();
 		foreach ($packages as $package) {
 			if (file_exists($package->template_path)) {
@@ -74,6 +75,17 @@ class Template {
 	 */
 	public function add_environment($key, $value) {
 		$this->template->add_environment($key, $value);
+	}
+
+	/**
+	 * Add template directory
+	 *
+	 * @access public
+	 * @param string $path
+	 * @param string $namespace
+	 */
+	public function add_template_directory($path, $namespace = null) {
+		$this->template->add_template_directory($path, $namespace);
 	}
 
 	/**

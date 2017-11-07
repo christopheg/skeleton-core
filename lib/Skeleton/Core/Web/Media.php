@@ -16,15 +16,16 @@ class Media {
 	 * Image extensions
 	 *
 	 * @var array $filetypes
-	 * @access private
+	 * @access protected
 	 */
-	private static $filetypes = [
+	protected static $filetypes = [
 		'image' => [
 			'gif',
 			'jpg',
 			'jpeg',
 			'png',
 			'ico',
+			'svg',
 		],
 		'doc' => [
 			'pdf',
@@ -78,15 +79,16 @@ class Media {
 		$request_string = implode('/', $request);
 
 		// Detect if it is a request for multiple files
+		$class = get_called_class();
 		if (strpos($request_string, '&/') !== false) {
 			$files = explode('&/', $request_string);
 
 			$mtime = 0;
 			foreach ($files as $file) {
-				$file_mtime = self::fetch('mtime', $file, $extension);
+				$file_mtime = $class::fetch('mtime', $file, $extension);
 
 				if ($file_mtime === false) {
-					self::fail();
+					$class::fail();
 				}
 
 				if ($file_mtime > $mtime) {
@@ -97,32 +99,32 @@ class Media {
 			if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
 				if ($_SERVER['HTTP_IF_MODIFIED_SINCE'] == gmdate('D, d M Y H:i:s', $mtime).' GMT') {
 					// Cached version
-					self::output($extension, '', $mtime);
+					$class::output($extension, '', $mtime);
 				}
 			}
 
 			$content = '';
 			foreach ($files as $file) {
-				$content .= self::fetch('content', $file, $extension) . "\n";
+				$content .= $class::fetch('content', $file, $extension) . "\n";
 			}
 
 			$content = $content;
 			$filename = 'compacted.' . $extension;
 		} else {
-			$mtime = self::fetch('mtime', $request_string, $extension);
+			$mtime = $class::fetch('mtime', $request_string, $extension);
 
 			if ($mtime === false) {
-				self::fail();
+				$class::fail();
 			}
 
 			if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
 				if ($_SERVER['HTTP_IF_MODIFIED_SINCE'] == gmdate('D, d M Y H:i:s', $mtime).' GMT') {
 					// Cached version
-					self::output($extension, '', $mtime);
+					$class::output($extension, '', $mtime);
 				}
 			}
 
-			$content = self::fetch('content', $request_string, $extension);
+			$content = $class::fetch('content', $request_string, $extension);
 
 			// If content is null, we don't handle this extension at all. It would be false if the
 			// file could not be found.
@@ -133,22 +135,22 @@ class Media {
 
 		// .css files can contain URLs and need to be passed through our URL
 		// rewrite method
-		if (self::get_mime_type($extension) == 'text/css') {
+		if ($class::get_mime_type($extension) == 'text/css') {
 			// FIXME: this has been disabled for now, but it needs to be fixed.
 			// Only CSS files that have been fetched from the application's
 			// asset directory should be rewritten.
 			//$content = \Skeleton\Core\Util::rewrite_reverse_css($content);
 		}
 
-		self::output($extension, $content, $mtime);
+		$class::output($extension, $content, $mtime);
 	}
 
 	/**
 	 * Fail
 	 *
-	 * @access private
+	 * @access protected
 	 */
-	private static function fail() {
+	protected static function fail() {
 		if (\Skeleton\Core\Hook::exists('media_not_found')) {
 			\Skeleton\Core\Hook::call('media_not_found');
 		} else {
@@ -159,14 +161,14 @@ class Media {
 	/**
 	 * Fetch the contents and mtime of a file
 	 *
-	 * @access private
+	 * @access protected
 	 * @param string $type
 	 * @param string $path
 	 * @param string $extension
 	 * @return mixed $content Returns a string with the content, false if it
 	 *  couldn't be found or null if it shouldn't be handled by us anyway
 	 */
-	private static function fetch($type, $path, $extension) {
+	protected static function fetch($type, $path, $extension) {
 		$packages = \Skeleton\Core\Package::get_all();
 
 		foreach (self::$filetypes as $filetype => $extensions) {
@@ -257,6 +259,9 @@ class Media {
 						 break;
 
 			case 'txt' : $mime_type = 'text/plain';
+						 break;
+
+			case 'svg' : $mime_type = 'image/svg+xml';
 						 break;
 
 			default    : $mime_type = 'application/octet-stream';
