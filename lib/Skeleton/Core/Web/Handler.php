@@ -53,10 +53,10 @@ class Handler {
 		$request_uri = '/' . implode('/', $request_uri_parts) . '/';
 
 		 // Find out what the hostname is, if none was found, bail out
-		if (!empty($_SERVER['SERVER_NAME'])) {
-			$hostname = $_SERVER['SERVER_NAME'];
-		} elseif (!empty($_SERVER['HTTP_HOST'])) {
+		if (!empty($_SERVER['HTTP_HOST'])) {
 			$hostname = $_SERVER['HTTP_HOST'];
+		} elseif (!empty($_SERVER['SERVER_NAME'])) {
+			$hostname = $_SERVER['SERVER_NAME'];
 		} else {
 			throw new \Exception('Not a web request');
 		}
