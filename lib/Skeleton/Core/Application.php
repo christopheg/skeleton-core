@@ -67,6 +67,15 @@ class Application {
 	public $hostname = null;
 
 	/**
+	 * Matched hostname
+	 * This variable contains the config value for the matched hostname
+	 *
+	 * @var string $matched_hostname
+	 * @access public
+	 */
+	public $matched_hostname = null;
+
+	/**
 	 * Relative URI to the application's base URI
 	 *
 	 * @var string $request_relative_uri
@@ -273,6 +282,7 @@ class Application {
 		// Regular matches
 		foreach ($applications as $application) {
 			if (in_array($hostname, $application->config->hostnames)) {
+				$application->matched_hostname = $hostname;
 				$matched_applications[] = $application;
 			}
 		}
@@ -293,7 +303,9 @@ class Application {
 
 				foreach ($wildcard_hostnames as $wildcard_hostname) {
 					if (fnmatch($wildcard_hostname, $hostname)) {
-						$matched_applications[] = $application;
+						$clone = clone $application;
+						$clone->matched_hostname = $wildcard_hostname;
+						$matched_applications[] = $clone;
 					}
 				}
 			}
@@ -312,6 +324,7 @@ class Application {
 			$matched_applications[$key] = $application;
 		}
 
+
 		// Now that we have matching applications, see if one matches the
 		// request specifically. Otherwise, simply return the first one.
 		$matched_applications_sorted = [];
@@ -325,7 +338,7 @@ class Application {
 					$matched_applications_sorted[strlen($application->config->base_uri)] = $application;
 				}
 			} else {
-				$matched_applications_sorted[0] = $application;
+				$matched_applications_sorted[strlen($application->matched_hostname)] = $application;
 			}
 		}
 
