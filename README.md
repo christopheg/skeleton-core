@@ -19,8 +19,8 @@ Initialize the application directory
 Hostname configuration
 
 	admin.test.example.be
-	admin.\*.example.be
-	admin.\*.example.be/admin
+	admin.*.example.be
+	admin.*.example.be/admin
 
 	If the uri is admin.test.example.be/admin,
 	the first one will match because of the exact match of the hostname
