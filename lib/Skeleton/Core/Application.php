@@ -324,7 +324,6 @@ class Application {
 			$matched_applications[$key] = $application;
 		}
 
-
 		// Now that we have matching applications, see if one matches the
 		// request specifically. Otherwise, simply return the first one.
 		$matched_applications_sorted = [];
@@ -335,19 +334,21 @@ class Application {
 					$application->config->base_uri = '/';
 				}
 				if (strpos($request_uri, $application->config->base_uri) === 0) {
-					$matched_applications_sorted[strlen($application->config->base_uri)] = $application;
+					$matched_applications_sorted[strlen($application->matched_hostname)][strlen($application->config->base_uri)] = $application;
 				}
 			} else {
-				$matched_applications_sorted[strlen($application->matched_hostname)] = $application;
+				$matched_applications_sorted[strlen($application->matched_hostname)][0] = $application;
 			}
 		}
 
 		// Sort the matched array by key, so the most specific one is at the end
 		ksort($matched_applications_sorted);
+		$applications = array_pop($matched_applications_sorted);
 
-		if (count($matched_applications_sorted) > 0) {
+		if (count($applications) > 0) {
 			// Get the most specific one
-			$application = array_pop($matched_applications_sorted);
+			ksort($applications);
+			$application = array_pop($applications);
 			Application::set($application);
 			return Application::get();
 		}
