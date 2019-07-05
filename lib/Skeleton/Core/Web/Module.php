@@ -9,7 +9,6 @@
 namespace Skeleton\Core\Web;
 
 use Skeleton\Core\Application;
-use Skeleton\Core\Hook;
 
 abstract class Module {
 
@@ -41,9 +40,7 @@ abstract class Module {
 
 		// Bootstrap the application
 		$application = \Skeleton\Core\Application::get();
-
-		// Call the bootstrap hook if it exists
-		Hook::call_if_exists('bootstrap', [$this]);
+		$application->call_event_if_exists('application', 'bootstrap', [ $this ]);
 
 		// Find the template and set it up
 		$template = \Skeleton\Core\Web\Template::Get();
@@ -60,9 +57,9 @@ abstract class Module {
 		if ($allowed === false) {
 			$module_403 = strtolower(\Skeleton\Core\Config::$module_403);
 
-			// Always check if it can not be handled by a hook first
-			if (Hook::exists('module_access_denied')) {
-				Hook::call('module_access_denied', [$this]);
+			// Always check if it can not be handled by an event first
+			if ($application->event_exists('module', 'access_denied')) {
+				$application->call_event_if_exists('module', 'access_denied', [ $this ]);
 			} elseif ($module_403 !== null and file_exists($application->module_path . '/' . $module_403 . '.php')) {
 				require $application->module_path . '/' . $module_403 . '.php';
 				$classname = 'Web_Module_' . $module_403;
@@ -75,8 +72,8 @@ abstract class Module {
 			$this->handle_request();
 		}
 
-		// Call the teardown hook if it exists
-		Hook::call_if_exists('teardown', [$this]);
+		// Call the teardown event if it exists
+		$application->call_event_if_exists('application', 'teardown', [ $this ]);
 	}
 
 	/**

@@ -151,8 +151,9 @@ class Media {
 	 * @access protected
 	 */
 	protected static function fail() {
-		if (\Skeleton\Core\Hook::exists('media_not_found')) {
-			\Skeleton\Core\Hook::call('media_not_found');
+		$application = \Skeleton\Core\Application::get();
+		if ($application->event_exists('media', 'not_found')) {
+			$application->call_event_if_exists('media', 'not_found', [ ]);
 		} else {
 			HTTP\Status::code_404('media');
 		}

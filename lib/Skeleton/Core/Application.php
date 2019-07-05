@@ -100,11 +100,130 @@ class Application {
 	public $config = null;
 
 	/**
+	 * Events
+	 *
+	 * @access public
+	 * @var array $events
+	 */
+	public $events = [];
+
+	/**
 	 * Constructor
 	 *
 	 * @access public
 	 */
-	public function __construct() {
+	public function __construct($name) {
+		$this->name = $name;
+		$this->get_details();
+	}
+
+	/**
+	 * Get details of application
+	 *
+	 * @access protected
+	 */
+	protected function get_details() {
+		$application_path = realpath(Config::$application_dir . '/' . $this->name);
+
+		if (!file_exists($application_path)) {
+			throw new Exception('Application with name "' . $this->name . '" not found');
+		}
+		$this->path = $application_path;
+
+		$this->load_config();
+
+		$this->media_path = $application_path . '/media/';
+		$this->module_path = $application_path . '/module/';
+		$this->template_path = $application_path . '/template/';
+		$this->event_path = $application_path . '/event/';
+
+		if (class_exists('\Skeleton\I18n\Config') AND isset(\Skeleton\I18n\Config::$language_interface)) {
+			$classname = \Skeleton\I18n\Config::$language_interface;
+			if (!class_exists($classname)) {
+				throw new \Exception('The language interface does not exists: ' . \Skeleton\I18n\Config::$language_interface);
+			}
+			$this->language = $classname::get_by_name_short($this->config->default_language);
+		}
+	}
+
+	/**
+	 * Load the config
+	 *
+	 * @access private
+	 */
+	private function load_config() {
+		if (file_exists($this->path . '/config/Config.php')) {
+			require_once $this->path . '/config/Config.php';
+			$classname = 'Config_' . ucfirst($this->name);
+			$config = new $classname;
+		} else {
+			throw new \Exception('No config file in application directory. Please create "' . $this->path . '/config/Config.php');
+		}
+		$this->config = $config;
+	}
+
+	/**
+	 * Check if an event exists
+	 *
+	 * @access public
+	 * @param string $context
+	 * @param string $action
+	 * @return bool $exists
+	 */
+	public function event_exists($context, $action) {
+		// Check if the event class is already loaded
+		$class = null;
+
+		if (isset($this->events[$context])) {
+			$class = $this->events[$context];
+		}
+
+		if ($class === null) {
+			if (file_exists($this->event_path . '/' . strtolower($context) . '.php')) {
+				require_once $this->event_path . '/' . strtolower($context) . '.php';
+				$classname = 'Event_' . ucfirst($context);
+				$class = new $classname;
+				$this->events[$context] = $class;
+			}
+		}
+
+		if ($class === null) {
+			return false;
+		}
+
+		if (!is_callable([$class, $action])) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Call event
+	 *
+	 * @access public
+	 * @param string $context
+	 * @param string $action
+	 */
+	public function call_event($context, $action, $arguments) {
+		if (!$this->event_exists($context, $action)) {
+			throw new Exception('Cannot call event, event ' . $action . ' in context ' . $context . ' does not exists');
+		}
+		call_user_func_array( [$this->events[$context], $action], $arguments);
+	}
+
+	/**
+	 * Call event if exists
+	 *
+	 * @access public
+	 * @param string $context
+	 * @param string $action
+	 */
+	public function call_event_if_exists($context, $action, $arguments) {
+		if (!$this->event_exists($context, $action)) {
+			return;
+		}
+		call_user_func_array( [$this->events[$context], $action], $arguments);
 	}
 
 	/**
@@ -373,29 +492,7 @@ class Application {
 				continue;
 			}
 
-			if (file_exists(Config::$application_dir . '/' . $application_directory . '/config/Config.php')) {
-				require_once Config::$application_dir . '/' . $application_directory . '/config/Config.php';
-				$classname = 'Config_' . ucfirst($application_directory);
-				$config = new $classname;
-			} else {
-				throw new \Exception('No config file in application directory. Please create "' . Config::$application_dir . '/' . $application_directory . '/config/Config.php');
-			}
-
-			$app_path = realpath(Config::$application_dir . '/' . $application_directory);
-			$application = new Application();
-			$application->media_path = $app_path . '/media/';
-			$application->module_path = $app_path . '/module/';
-			$application->template_path = $app_path . '/template/';
-			$application->path = $app_path;
-			$application->name = $application_directory;
-			$application->config = $config;
-			if (class_exists('\Skeleton\I18n\Config') AND isset(\Skeleton\I18n\Config::$language_interface)) {
-				$classname = \Skeleton\I18n\Config::$language_interface;
-				if (!class_exists($classname)) {
-					throw new \Exception('The language interface does not exists: ' . \Skeleton\I18n\Config::$language_interface);
-				}
-				$application->language = $classname::get_by_name_short($config->default_language);
-			}
+			$application = new self($application_directory);
 			$applications[] = $application;
 		}
 		return $applications;
@@ -409,13 +506,6 @@ class Application {
 	 * @return Application $application
 	 */
 	public static function get_by_name($name) {
-		$applications = self::get_all();
-		foreach ($applications as $application) {
-			if ($application->name == $name) {
-				return $application;
-			}
-		}
-
-		throw new \Exception('Application ' . $name . ' does not exists.');
+		return new self($name);
 	}
 }

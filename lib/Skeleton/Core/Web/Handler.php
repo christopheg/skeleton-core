@@ -9,7 +9,6 @@
 
 namespace Skeleton\Core\Web;
 
-use Skeleton\Core\Hook;
 use Skeleton\Core\Application;
 use Skeleton\I18n\Language;
 use Skeleton\Database\Database;
@@ -96,8 +95,8 @@ class Handler {
 				// Attempt to find a module by matching paths
 				$module = Module::get($application->request_relative_uri);
 			} catch (\Exception $e) {
-				if (Hook::exists('module_not_found')) {
-					Hook::call('module_not_found');
+				if ($application->event_exists('module', 'not_found')) {
+					$application->call_event_if_exists('module', 'not_found', [ $this ]);
 				} else {
 					HTTP\Status::code_404('module');
 				}
