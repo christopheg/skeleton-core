@@ -25,6 +25,8 @@ Installation via composer:
 
 ## Configuration
 
+### Start
+
 Initialize the application directory
 
     \Skeleton\Core\Config::$application_dir = $some_very_cool_directory;
@@ -44,6 +46,7 @@ Make sure an application follows the following directory structure
             - image
 
 Add an additional asset directory.
+
 		\Skeleton\Core\Config::$asset_dir = $my_frontend_library_directory;
 
 
@@ -145,6 +148,7 @@ those requests have a method-name starting with 'display'. The method is defined
 based on the $_GET['action'] variable.
 
 Some examples:
+
 | requested uri    | classname           | method               |
 | -------------    | ---------           | --------             |
 | /user            | Web_Module_User     | display()			|
@@ -153,7 +157,9 @@ Some examples:
 ### Media
 
 If the requested url contains an extension that is from a known media type,
-the requested file is search for in the media/* directory of the application.
+the requested file is searched for in the media/* directory of the application.
+If the requested media file is not found, skeleton-core will search for the media
+in the Config::$asset_dir
 
 ### Events
 Events can be created to perform a task on certain key-moments in the
