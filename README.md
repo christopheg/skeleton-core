@@ -165,7 +165,9 @@ in the Config::$asset_dir
 Events can be created to perform a task on certain key-moments in the
 application execution. Events are defined in Event context classes. These classes
 are optionally but when needed, should be located in the 'event' directory. The
-classname should be 'Event_XXX', with XXX being one of the available contexts:
+filename should be 'name_of_the_context.php' (ex: Application.php). The
+classname should be located in namespace \App\YOUR_APP\Event\CONTEXT, with
+CONTEXT being one of the available contexts:
     - Application
     - Module
     - Media
@@ -181,9 +183,9 @@ Example event class:
      * @author David Vandemaele <david@tigron.be>
      */
 
-    use \Skeleton\Core\Event;
+	namespace App\Admin\Event;
 
-    class Event_Module extends Event {
+    class Module extends \Skeleton\Core\Event {
 
         /**
          * Access denied
@@ -210,6 +212,12 @@ The bootstrap method is called before loading the application module.
 The teardown method is called after the last action of the application is done.
 
     	public function teardown(\Skeleton\Core\Web\Module $module) { }
+
+The detect method is called on every request to determine if the application
+should handle the request, based on the hostname and the $request_uri.
+This event should return 'true' in order to proceed with this application.
+
+    	public function detect($hostname, $request_uri) { }
 
 #### Module context
 

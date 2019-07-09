@@ -179,9 +179,9 @@ class Application {
 		}
 
 		if ($class === null) {
-			if (file_exists($this->event_path . '/' . strtolower($context) . '.php')) {
-				require_once $this->event_path . '/' . strtolower($context) . '.php';
-				$classname = 'Event_' . ucfirst($context);
+			if (file_exists($this->event_path . '/' . ucfirst($context) . '.php')) {
+				require_once $this->event_path . '/' . ucfirst($context) . '.php';
+				$classname = '\\App\\' . ucfirst($this->name) . '\\Event\\' . ucfirst($context);
 				$class = new $classname;
 				$this->events[$context] = $class;
 			}
@@ -209,7 +209,7 @@ class Application {
 		if (!$this->event_exists($context, $action)) {
 			throw new Exception('Cannot call event, event ' . $action . ' in context ' . $context . ' does not exists');
 		}
-		call_user_func_array( [$this->events[$context], $action], $arguments);
+		return call_user_func_array( [$this->events[$context], $action], $arguments);
 	}
 
 	/**
@@ -223,7 +223,7 @@ class Application {
 		if (!$this->event_exists($context, $action)) {
 			return;
 		}
-		call_user_func_array( [$this->events[$context], $action], $arguments);
+		return call_user_func_array( [$this->events[$context], $action], $arguments);
 	}
 
 	/**
@@ -397,6 +397,16 @@ class Application {
 		// Find matching applications
 		$applications = self::get_all();
 		$matched_applications = [];
+
+		// Match via event
+		foreach ($applications as $application) {
+			if (!$application->event_exists('application', 'detect')) {
+				continue;
+			}
+			if ($application->call_event('application', 'detect', [ $hostname, $request_uri ])) {
+				$matched_applications[] = $application;
+			}
+		}
 
 		// Regular matches
 		foreach ($applications as $application) {
