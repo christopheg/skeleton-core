@@ -65,7 +65,7 @@ class Handler {
 		 */
 		try {
 			$application = Application::detect($hostname, $request_uri);
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 			HTTP\Status::code_404('application');
 		}
 
