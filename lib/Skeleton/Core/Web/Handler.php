@@ -114,18 +114,10 @@ class Handler {
 			}
 
 			if (!isset($_SESSION['language'])) {
-				if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
-					$languages = $language_interface::get_all();
-
-					foreach ($languages as $language) {
-						if (strpos($_SERVER['HTTP_ACCEPT_LANGUAGE'], $language->name_short) !== false) {
-							$language = $language;
-							$_SESSION['language'] = $language;
-						}
-					}
-				}
-
-				if (!isset($_SESSION['language'])) {
+				try {
+					$language = $language_interface::detect();
+					$_SESSION['language'] = $language;
+				} catch (\Exception $e) {
 					$language = $language_interface::get_by_name_short($application->config->default_language);
 					$_SESSION['language'] = $language;
 				}
@@ -141,8 +133,6 @@ class Handler {
 			}
 			$application->language = $_SESSION['language'];
 		}
-
-
 
 		if ($module !== null) {
 			$module->accept_request();
