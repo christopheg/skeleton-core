@@ -219,7 +219,7 @@ class Application {
 	 * @param string $context
 	 * @param string $action
 	 */
-	public function call_event_if_exists($context, $action, $arguments) {
+	public function call_event_if_exists($context, $action, $arguments = []) {
 		if (!$this->event_exists($context, $action)) {
 			return;
 		}
