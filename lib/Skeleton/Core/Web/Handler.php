@@ -96,7 +96,7 @@ class Handler {
 				$module = Module::get($application->request_relative_uri);
 			} catch (\Exception $e) {
 				if ($application->event_exists('module', 'not_found')) {
-					$application->call_event_if_exists('module', 'not_found', [ $this ]);
+					$application->call_event_if_exists('module', 'not_found');
 				} else {
 					HTTP\Status::code_404('module');
 				}
