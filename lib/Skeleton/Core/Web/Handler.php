@@ -52,13 +52,23 @@ class Handler {
 		$request_uri = '/' . implode('/', $request_uri_parts) . '/';
 
 		 // Find out what the hostname is, if none was found, bail out
-		if (!empty($_SERVER['SERVER_NAME'])) {
-			$hostname = $_SERVER['SERVER_NAME'];
-		} elseif (!empty($_SERVER['HTTP_HOST'])) {
-			$hostname = $_SERVER['HTTP_HOST'];
+		if (isset($_SERVER['HTTP_X_FORWARDED_HOST']) and $hostname = $_SERVER['HTTP_X_FORWARDED_HOST']) {
+			$elements = explode(',', $host);
+			$hostname = trim(end($elements));
 		} else {
-			throw new \Exception('Not a web request');
+			if (isset($_SERVER['HTTP_HOST'])) {
+				$hostname = $_SERVER['HTTP_HOST'];
+			} elseif (isset($_SERVER['SERVER_NAME'])) {
+				$hostname = $_SERVER['SERVER_NAME'];
+			} elseif (isset($_SERVER['SERVER_ADDR'])) {
+				$hostname = $_SERVER['SERVER_ADDR'];
+			} else {
+				throw new \Exception('Not a web request');
+			}
 		}
+
+		// Remove port number from host
+		$hostname = preg_replace('/:\d+$/', '', $hostname);
 
 		/**
 		 * Define the application
