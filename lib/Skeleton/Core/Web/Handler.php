@@ -52,21 +52,19 @@ class Handler {
 		$request_uri = '/' . implode('/', $request_uri_parts) . '/';
 
 		 // Find out what the hostname is, if none was found, bail out
-		if (isset($_SERVER['HTTP_X_FORWARDED_HOST']) and $hostname = $_SERVER['HTTP_X_FORWARDED_HOST']) {
-			$elements = explode(',', $host);
+		if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
+			$elements = explode(',', $_SERVER['HTTP_X_FORWARDED_HOST']);
 			$hostname = trim(end($elements));
+		} elseif (isset($_SERVER['HTTP_HOST'])) {
+			$hostname = $_SERVER['HTTP_HOST'];
+		} elseif (isset($_SERVER['SERVER_NAME'])) {
+			$hostname = $_SERVER['SERVER_NAME'];
+		} elseif (isset($_SERVER['SERVER_ADDR'])) {
+			$hostname = $_SERVER['SERVER_ADDR'];
 		} else {
-			if (isset($_SERVER['HTTP_HOST'])) {
-				$hostname = $_SERVER['HTTP_HOST'];
-			} elseif (isset($_SERVER['SERVER_NAME'])) {
-				$hostname = $_SERVER['SERVER_NAME'];
-			} elseif (isset($_SERVER['SERVER_ADDR'])) {
-				$hostname = $_SERVER['SERVER_ADDR'];
-			} else {
-				throw new \Exception('Not a web request');
-			}
+			throw new \Exception('Not a web request');
 		}
-
+		
 		// Remove port number from host
 		$hostname = preg_replace('/:\d+$/', '', $hostname);
 
