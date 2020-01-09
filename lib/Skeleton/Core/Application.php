@@ -8,6 +8,8 @@
 
 namespace Skeleton\Core;
 
+class Exception_Unknown_Application extends \Exception {}
+
 class Application {
 
 	/**
@@ -482,7 +484,7 @@ class Application {
 			return Application::get();
 		}
 
-		throw new \Exception('No application found for ' . $hostname);
+		throw new Exception_Unknown_Application('No application found for ' . $hostname);
 	}
 
 	/**

@@ -64,7 +64,7 @@ class Handler {
 		} else {
 			throw new \Exception('Not a web request');
 		}
-		
+
 		// Remove port number from host
 		$hostname = preg_replace('/:\d+$/', '', $hostname);
 
@@ -73,7 +73,7 @@ class Handler {
 		 */
 		try {
 			$application = Application::detect($hostname, $request_uri);
-		} catch (\Exception $e) {
+		} catch (\Skeleton\Core\Exception_Unknown_Application $e) {
 			HTTP\Status::code_404('application');
 		}
 
