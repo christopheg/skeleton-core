@@ -25,7 +25,7 @@ class Session {
 	 */
 	public static function start() {
 		session_name(\Skeleton\Core\Config::$session_name);
-		session_start();
+		@session_start();
 	}
 
 	/**
