@@ -372,7 +372,7 @@ class Application {
 	 * @access public
 	 * @param Application $application
 	 */
-	public static function set(Application $application) {
+	public static function set(Application $application = null) {
 		self::$application = $application;
 	}
 
