@@ -94,9 +94,10 @@ class Template {
 	 *
 	 * @access public
 	 * @param string $template
+	 * @param bool $rewrite_html
 	 */
-	public function display($template) {
-		echo \Skeleton\Core\Util::rewrite_reverse_html($this->template->render($template));
+	public function display($template, $rewrite_html = true) {
+		echo $this->render($template, $rewrite_html);
 	}
 
 	/**
@@ -108,17 +109,27 @@ class Template {
 	 * @return string $rendered_template
 	 */
 	 public function render($template, $rewrite_html = true) {
- 		if ($rewrite_html) {
- 			return \Skeleton\Core\Util::rewrite_reverse_html($this->template->render($template));
- 		} else {
- 			return $this->template->render($template);
- 		}
- 	}
+		$csrf = Security\Csrf::get();
+
+		$this->add_environment('csrf_session_token_name', $csrf->get_session_token_name());
+		$this->add_environment('csrf_header_token_name', $csrf->get_post_token_name());
+		$this->add_environment('csrf_post_token_name', $csrf->get_post_token_name());
+		$this->add_environment('csrf_token', $csrf->get_session_token());
+
+		$output = $this->template->render($template);
+		$output = $csrf->inject($output);
+
+		if ($rewrite_html) {
+			return \Skeleton\Core\Util::rewrite_reverse_html($output);
+		} else {
+			return $output;
+		}
+	}
 
 	/**
 	 * Get function, returns Template object
 	 */
-	public static function Get() {
+	public static function get() {
 		if (self::$web_template === null) {
 			self::$web_template = new Template();
 		}

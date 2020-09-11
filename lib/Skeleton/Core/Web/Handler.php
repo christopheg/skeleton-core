@@ -87,7 +87,8 @@ class Handler {
 		/**
 		 * Start the session
 		 */
-		Session::start();
+		$session_properties = [];
+		Session::start($session_properties);
 
 		/**
 		 * Find the module to load
@@ -140,6 +141,19 @@ class Handler {
 				}
 			}
 			$application->language = $_SESSION['language'];
+		}
+
+		/**
+		 * Validate CSRF
+		 */
+		$csrf = Security\Csrf::get();
+
+		if ($session_properties['resumed'] === true && !$csrf->validate()) {
+			if ($application->event_exists('security', 'csrf_validation_failed')) {
+				$application->call_event_if_exists('security', 'csrf_validation_failed');
+			} else {
+				HTTP\Status::code_403('CSRF validation failed');
+			}
 		}
 
 		if ($module !== null) {

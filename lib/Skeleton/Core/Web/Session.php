@@ -23,9 +23,16 @@ class Session {
 	 *
 	 * @access public
 	 */
-	public static function start() {
+	public static function start(&$properties = []) {
 		session_name(\Skeleton\Core\Config::$session_name);
-		@session_start();
+
+		if (isset($_COOKIE[\Skeleton\Core\Config::$session_name])) {
+			$properties['resumed'] = true;
+		} else {
+			$properties['resumed'] = false;
+		}
+
+		return @session_start();
 	}
 
 	/**

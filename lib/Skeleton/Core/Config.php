@@ -61,4 +61,12 @@ class Config {
 	 * @var string $sticky_session_namse
 	 */
 	public static $sticky_session_name = 'sys_sticky_session';
+
+	/**
+	 * Enable automatic CSRF handling
+	 *
+	 * @access public
+	 * @var boolean $csrf_enabled
+	 */
+	public static $csrf_enabled = false;
 }
