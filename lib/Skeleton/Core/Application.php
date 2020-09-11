@@ -207,7 +207,7 @@ class Application {
 	 * @param string $context
 	 * @param string $action
 	 */
-	public function call_event($context, $action, $arguments) {
+	public function call_event($context, $action, $arguments = []) {
 		if (!$this->event_exists($context, $action)) {
 			throw new Exception('Cannot call event, event ' . $action . ' in context ' . $context . ' does not exists');
 		}
