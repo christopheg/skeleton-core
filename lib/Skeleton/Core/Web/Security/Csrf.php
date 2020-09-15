@@ -194,6 +194,13 @@ class Csrf {
 	public function validate() {
 		$application = \Skeleton\Core\Application::get();
 
+		// Allow the application to override running the validation process completely
+		if ($this->enabled && $application->event_exists('security', 'csrf_validate_enabled')) {
+			if ($application->call_event('security', 'csrf_validate_enabled') === false) {
+				return true;
+			}
+		}
+
 		// Save the token locally so we can unset it later, as to not hinder
 		// further processing
 		if (isset($_POST[$this->post_token_name])) {
