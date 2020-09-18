@@ -203,49 +203,6 @@ requested file will be served from the `media/` directory of the application.
 If the requested media file could not be found, `skeleton-core` will search for
 a matching file in the folder specified by `Config::$asset_dir` (if any).
 
-### Events
-
-Events can be created to perform a task at specific key points during the
-application's execution.
-
-Events are defined in `Event` context classes. These classes are optional, but
-when they are used, they should be located in the `event` directory. The
-filename should be in the form of `Context_name.php`, for example
-`Application.php`.
-
-The class should extend from `Skeleton\Core\Event` and the classname should be
-within the namespace `\App\Your_application\Event\Context`, where
-`Your_application` is the name of your application, and `Context` is one of the
-available contexts:
-
-- Application
-- Media
-- Module
-
-Example of a `Module` event class for an application named `admin`:
-
-    <?php
-    /**
-     * Module events for the "admin" application
-     */
-
-    namespace App\Admin\Event;
-
-    class Module extends \Skeleton\Core\Event {
-
-        /**
-         * Access denied
-         *
-         * @access public
-         */
-        public function access_denied() {
-            \Skeleton\Core\Web\Session::redirect('/reset');
-        }
-
-    }
-
-The different contexts and their events are described below.
-
 ### CSRF
 
 The `skeleton-core` package can take care of automatically injecting and
@@ -301,6 +258,49 @@ configure settings which will be applied for every subsequent `$.ajax()` call
 
 Notice the check for the request type and cross domain requests. This avoids
 sending your token along with requests which don't need it.
+
+### Events
+
+Events can be created to perform a task at specific key points during the
+application's execution.
+
+Events are defined in `Event` context classes. These classes are optional, but
+when they are used, they should be located in the `event` directory. The
+filename should be in the form of `Context_name.php`, for example
+`Application.php`.
+
+The class should extend from `Skeleton\Core\Event` and the classname should be
+within the namespace `\App\Your_application\Event\Context`, where
+`Your_application` is the name of your application, and `Context` is one of the
+available contexts:
+
+- Application
+- Media
+- Module
+
+Example of a `Module` event class for an application named `admin`:
+
+    <?php
+    /**
+     * Module events for the "admin" application
+     */
+
+    namespace App\Admin\Event;
+
+    class Module extends \Skeleton\Core\Event {
+
+        /**
+         * Access denied
+         *
+         * @access public
+         */
+        public function access_denied() {
+            \Skeleton\Core\Web\Session::redirect('/reset');
+        }
+
+    }
+
+The different contexts and their events are described below.
 
 #### Application context
 
