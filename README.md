@@ -209,8 +209,9 @@ Events can be created to perform a task at specific key points during the
 application's execution.
 
 Events are defined in `Event` context classes. These classes are optional, but
-when they are used, they should be located in the `event` directory. The filename
-should be in the form of `Context_name.php`, for example `Application.php`.
+when they are used, they should be located in the `event` directory. The
+filename should be in the form of `Context_name.php`, for example
+`Application.php`.
 
 The class should extend from `Skeleton\Core\Event` and the classname should be
 within the namespace `\App\Your_application\Event\Context`, where
@@ -245,6 +246,62 @@ Example of a `Module` event class for an application named `admin`:
 
 The different contexts and their events are described below.
 
+### CSRF
+
+The `skeleton-core` package can take care of automatically injecting and
+validating CSRF tokens for every `POST` request it receives. Various events have
+been defined, with which you can control the CSRF flow. A list of these events
+can be found further down.
+
+CSRF is disabled globally by default. If you would like to enable it, simply
+flip the `csrf_enabled` flag to true, for example in your global
+`Bootstrap::boot()` method.
+
+    \Skeleton\Core\Config::$csrf_enabled = true;
+
+Once enabled, it is enabled for all your applications. If you want to disable it
+for specific applications only, use the `csrf_validate_enabled()` event in the
+application's `Security` event context, as documented further down.
+
+When enabled, hidden form elements with the correct token as a value will
+automatically be injected into every `<form>...</form>` block found. This allows
+for it to work without needing to change your code.
+
+If you need access to the token value and names, you can access them from the
+`env` variable which is automatically assigned to your template. The available
+variables are listed below:
+
+- env.csrf_header_token_name
+- env.csrf_post_token_name
+- env.csrf_session_token_name
+- env.csrf_token
+
+One caveat are `XMLHttpRequest` calls (or `AJAX`). If your application is using
+`jQuery`, you can use the example below to automatically inject a header for
+every relevant `XMLHttpRequest`.
+
+First, make the token value and names available to your view. A good place to do
+so, might be the document's `<head>...</head>` block.
+
+    <!-- CSRF token values -->
+    <meta name="csrf-header-token-name" content="{{ env.csrf_header_token_name }}">
+    <meta name="csrf-token" content="{{ env.csrf_token }}">
+
+Next, we can make use of `jQuery`'s `$.ajaxSetup()`. This allows you to
+configure settings which will be applied for every subsequent `$.ajax()` call
+(or derivatives thereof, such as `$.post()`).
+
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            if (!(/^(GET|HEAD|OPTIONS|TRACE)$/.test(settings.type)) && !this.crossDomain) {
+                xhr.setRequestHeader($('meta[name="csrf-header-token-name"]').attr('content'), $('meta[name="csrf-token"]').attr('content'));
+            }
+        }
+    });
+
+Notice the check for the request type and cross domain requests. This avoids
+sending your token along with requests which don't need it.
+
 #### Application context
 
 ##### bootstrap
@@ -273,7 +330,7 @@ This event should return `true` in order to proceed with this application.
 
 ##### access_denied
 
-The `access_denied` method is called whenever a module is requested which  can
+The `access_denied` method is called whenever a module is requested which can
 not be accessed by the user. The optional `secure()` method in the module
 indicates whether the user is granted access or not.
 
@@ -305,3 +362,53 @@ The error event context is not actually part of `skeleton-core`, but rather of
 The `exception` method is called whenever an exception has not been caught.
 
     public function exception() { }
+
+#### Security context
+
+##### csrf_validate_enabled
+
+The `csrf_validate_enabled` method overrides the complete execution of the
+validation, which useful to exclude specific paths. An example implementation
+can be found below.
+
+    public function csrf_validate_enabled(): bool {
+        $excluded_paths = [
+            '/no/csrf/*',
+        ];
+
+        foreach ($excluded_paths as $excluded_path) {
+            if (fnmatch ($excluded_path, $_SERVER['REQUEST_URI']) === true) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+##### csrf_validate_success
+
+The `csrf_validate_success` method allows you to override the check result after
+a successful validation. It expects a boolean as a return value.
+
+##### csrf_validation_failed
+
+The `csrf_validation_failed` method allows you to override the check result
+after a failed validation. It expects a boolean as a return value.
+
+##### csrf_generate_session_token
+
+The `csrf_generate_session_token` method allows you to override the generation
+of the session token, and generate a custom value instead. It expects a string
+as a return value.
+
+##### csrf_inject
+
+The `csrf_inject` method allows you to override the automatic injection of the
+hidden CSRF token elements in the HTML forms of the rendered template. It
+expects a string as a return value, containing the rendered HTML to be sent back
+to the client.
+
+##### csrf_validate
+
+The `csrf_validate` method allows you to override the validation process of the
+CSRF token. It expects a boolean as a return value.
