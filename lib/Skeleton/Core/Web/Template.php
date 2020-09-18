@@ -112,7 +112,7 @@ class Template {
 		$csrf = Security\Csrf::get();
 
 		$this->add_environment('csrf_session_token_name', $csrf->get_session_token_name());
-		$this->add_environment('csrf_header_token_name', $csrf->get_post_token_name());
+		$this->add_environment('csrf_header_token_name', $csrf->get_header_token_name());
 		$this->add_environment('csrf_post_token_name', $csrf->get_post_token_name());
 		$this->add_environment('csrf_token', $csrf->get_session_token());
 
