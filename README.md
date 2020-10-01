@@ -412,3 +412,9 @@ to the client.
 
 The `csrf_validate` method allows you to override the validation process of the
 CSRF token. It expects a boolean as a return value.
+
+##### session_cookie
+
+The `session_cookie` method allows you to set session cookie parameters before
+the session is started. Typically, this would be used to SameSite cookie
+attribute.

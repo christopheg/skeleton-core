@@ -24,6 +24,9 @@ class Session {
 	 * @access public
 	 */
 	public static function start(&$properties = []) {
+		$application = \Skeleton\Core\Application::get();
+		$application->call_event_if_exists('security', 'session_cookie');
+
 		session_name(\Skeleton\Core\Config::$session_name);
 
 		if (isset($_COOKIE[\Skeleton\Core\Config::$session_name])) {
