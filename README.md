@@ -217,8 +217,11 @@ flip the `csrf_enabled` flag to true, for example in your global
     \Skeleton\Core\Config::$csrf_enabled = true;
 
 Once enabled, it is enabled for all your applications. If you want to disable it
-for specific applications only, use the `csrf_validate_enabled()` event in the
-application's `Security` event context, as documented further down.
+for specific applications only, flip the `csrf_enabled` flag to `false` in the
+application's `config/Config.php`.
+
+Several events are available to control the CSRF behaviour, these have been
+documented below.
 
 When enabled, hidden form elements with the correct token as a value will
 automatically be injected into every `<form>...</form>` block found. This allows
