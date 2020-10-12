@@ -47,12 +47,14 @@ class Session {
 	 */
 	public static function redirect($url, $rewrite = true) {
 		if ($rewrite) {
-			// TODO: I don't actually know why there is a try/catch around this?
-			try {
-				$url = \Skeleton\Core\Util::rewrite_reverse($url);
-			} catch (\Exception $e) { }
+			$url = \Skeleton\Core\Util::rewrite_reverse($url);
 		}
 
+		// Call teardown application event
+		$application = \Skeleton\Core\Application::get();
+		$application->call_event_if_exists('application', 'teardown');
+
+		// Redirect
 		header('Location: '.$url);
 		echo 'Redirecting to : '.$url;
 		exit;
