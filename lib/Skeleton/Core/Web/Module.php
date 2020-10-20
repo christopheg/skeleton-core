@@ -133,7 +133,7 @@ abstract class Module {
 	 */
 	public function get_name() {
 		if (strpos(get_class($this), 'Web_Module_') !== false) {
-			return strtolower(substr(get_class($this),strlen('Web_Module_')));
+			return strtolower(substr(get_class($this), strlen('Web_Module_')));
 		}
 
 		return strtolower(get_class($this));
@@ -175,6 +175,7 @@ abstract class Module {
 				return new $classname;
 			}
 		}
+
 		throw new \Exception('Module not found');
 	}
 
