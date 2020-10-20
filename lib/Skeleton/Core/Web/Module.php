@@ -42,10 +42,12 @@ abstract class Module {
 		$application = \Skeleton\Core\Application::get();
 		$application->call_event_if_exists('application', 'bootstrap', [ $this ]);
 
-		// Find the template and set it up
-		$template = \Skeleton\Core\Web\Template::Get();
-		$template->add_environment('module', $this);
-		$template->add_environment('sticky_session', $sticky->get_as_array());
+		// If we have the skeleton-template package installed, find the template and set it up
+		if (class_exists('\Skeleton\Template\Template')) {
+			$template = \Skeleton\Core\Web\Template::Get();
+			$template->add_environment('module', $this);
+			$template->add_environment('sticky_session', $sticky->get_as_array());
+		}
 
 		// Call our magic secure() method before passing on the request
 		$allowed = true;
@@ -96,11 +98,13 @@ abstract class Module {
 	 * @access public
 	 */
 	public function handle_request() {
-		$template = \Skeleton\Core\Web\Template::Get();
-
 		// Find out which method to call, fall back to calling displa()
 		if (isset($_REQUEST['action']) AND method_exists($this, 'display_' . $_REQUEST['action'])) {
-			$template->assign('action', $_REQUEST['action']);
+			if (class_exists('\Skeleton\Template\Template')) {
+				$template = \Skeleton\Core\Web\Template::Get();
+				$template->assign('action', $_REQUEST['action']);
+			}
+
 			call_user_func([$this, 'display_'.$_REQUEST['action']]);
 		} else {
 			$this->display();
@@ -108,6 +112,7 @@ abstract class Module {
 
 		// If the module has defined a template, render it
 		if ($this->template !== null and $this->template !== false) {
+			$template = \Skeleton\Core\Web\Template::Get();
 			$template->display($this->template);
 		}
 	}
