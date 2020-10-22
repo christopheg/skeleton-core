@@ -247,16 +247,14 @@ so, might be the document's `<head>...</head>` block.
     <meta name="csrf-header-token-name" content="{{ env.csrf_header_token_name }}">
     <meta name="csrf-token" content="{{ env.csrf_token }}">
 
-Next, we can make use of `jQuery`'s `$.ajaxSetup()`. This allows you to
+Next, we can make use of `jQuery`'s `$.ajaxSend()`. This allows you to
 configure settings which will be applied for every subsequent `$.ajax()` call
 (or derivatives thereof, such as `$.post()`).
 
-    $.ajaxSetup({
-        beforeSend: function(xhr, settings) {
-            if (!(/^(GET|HEAD|OPTIONS|TRACE)$/.test(settings.type)) && !this.crossDomain) {
-                xhr.setRequestHeader($('meta[name="csrf-header-token-name"]').attr('content'), $('meta[name="csrf-token"]').attr('content'));
-            }
-        }
+    $(document).ajaxSend(function(e, xhr, settings) {
+        if (!(/^(GET|HEAD|OPTIONS|TRACE)$/.test(settings.type)) && !this.crossDomain) {
+		    xhr.setRequestHeader($('meta[name="csrf-header-token-name"]').attr('content'), $('meta[name="csrf-token"]').attr('content'));
+		}
     });
 
 Notice the check for the request type and cross domain requests. This avoids
