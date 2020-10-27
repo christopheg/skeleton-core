@@ -133,7 +133,7 @@ class Autoloader {
 					class_parents($class_name, true);
 					return true;
 				}
-			} catch (\Exception $e) { }
+			} catch (\Skeleton\Core\Exception\Autoloading $e) { }
 		}
 
 		foreach ($this->include_paths as $include_path) {
@@ -147,7 +147,7 @@ class Autoloader {
 					class_parents($class_name, true);
 					return true;
 				}
-			} catch (\Exception $e) { }
+			} catch (\Skeleton\Core\Exception\Autoloading $e) { }
 
 			/**
 			 * If the file is not found, try with all lower case. This should be
@@ -161,7 +161,7 @@ class Autoloader {
 					class_parents($class_name, true);
 					return true;
 				}
-			} catch (\Exception $e) { }
+			} catch (\Skeleton\Core\Exception\Autoloading $e) { }
 
 		}
 	}
@@ -197,7 +197,7 @@ class Autoloader {
 
 			return true;
 		} else {
-			throw new \Exception('File not found');
+			throw new \Skeleton\Core\Exception\Autoloading('File not found');
 		}
 	}
 }
