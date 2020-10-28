@@ -10,7 +10,6 @@
 namespace Skeleton\Core\Web;
 
 use Skeleton\Core\Application;
-use Skeleton\I18n\Language;
 use Skeleton\Database\Database;
 
 class Handler {
