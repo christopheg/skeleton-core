@@ -211,7 +211,8 @@ class Application {
 		if (!$this->event_exists($context, $action)) {
 			throw new Exception('Cannot call event, event ' . $action . ' in context ' . $context . ' does not exists');
 		}
-		return call_user_func_array( [$this->events[$context], $action], $arguments);
+
+		return call_user_func_array($this->get_event_callable($context, $action), $arguments);
 	}
 
 	/**
@@ -225,7 +226,20 @@ class Application {
 		if (!$this->event_exists($context, $action)) {
 			return;
 		}
-		return call_user_func_array( [$this->events[$context], $action], $arguments);
+
+		return call_user_func_array($this->get_event_callable($context, $action), $arguments);
+	}
+
+	/**
+	 * Get a callable for an event
+	 *
+	 * @access public
+	 * @param string $context
+	 * @param string $action
+	 * @return array
+	 */
+	public function get_event_callable(string $context, string $action) {
+		return [$this->events[$context], $action];
 	}
 
 	/**
