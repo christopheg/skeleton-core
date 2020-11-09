@@ -260,6 +260,28 @@ configure settings which will be applied for every subsequent `$.ajax()` call
 Notice the check for the request type and cross domain requests. This avoids
 sending your token along with requests which don't need it.
 
+### Replay
+
+The built-in replay detection tries to work around duplicate form submissions by
+users double-clicking the submit button. Often, this is not caught in the UI.
+
+Replay detection is disabled by default, if you would like to enable it, flip
+the `replay` enabled flag to true. Example in `Bootstrap::boot()`:
+
+    \Skeleton\Core\Config::$replay_enabled = true;
+
+You can disable replay detection for individual applications by setting the
+`replay_enabled` flag to `false` in their respective configuration.
+
+When the replay detection is enabled, it will inject a hidden `__replay-token`
+element into every `form` element it can find. Each token will be unique. Once
+submited, the token is added to a list of tokens seen before. If the same token
+appears again within 30 seconds, the replay detection will be triggered.
+
+If your application has defined a `replay_detected` event, this will be called.
+It is up to the application to decide what action to take. One suggestion is to
+redirect the user to the value HTTP referrer, if present.
+
 ### Events
 
 Events can be created to perform a task at specific key points during the
@@ -413,6 +435,20 @@ to the client.
 
 The `csrf_validate` method allows you to override the validation process of the
 CSRF token. It expects a boolean as a return value.
+
+##### replay_detected
+
+The `replay_detected` method allows you to catch replay detection events. For
+example, you could redirect the user to the value of the HTTP referrer header
+if it is present:
+
+    public function replay_detected() {
+        if (!empty($_SERVER['HTTP_REFERER'])) {
+            Session::redirect($_SERVER['HTTP_REFERER'], false);
+        } else {
+            Session::redirect('/');
+        }
+    }
 
 ##### session_cookie
 

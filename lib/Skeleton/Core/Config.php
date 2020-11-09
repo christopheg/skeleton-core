@@ -69,4 +69,12 @@ class Config {
 	 * @var boolean $csrf_enabled
 	 */
 	public static $csrf_enabled = false;
+
+	/**
+	 * Enable automatic replay handling
+	 *
+	 * @access public
+	 * @var boolean $replay_enabled
+	 */
+	public static $replay_enabled = false;
 }

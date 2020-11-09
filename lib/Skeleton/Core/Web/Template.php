@@ -116,8 +116,11 @@ class Template {
 		$this->add_environment('csrf_post_token_name', $csrf->get_post_token_name());
 		$this->add_environment('csrf_token', $csrf->get_session_token());
 
+		$replay = Security\Replay::get();
+
 		$output = $this->template->render($template);
 		$output = $csrf->inject($output);
+		$output = $replay->inject($output);
 
 		if ($rewrite_html) {
 			return \Skeleton\Core\Util::rewrite_reverse_html($output);

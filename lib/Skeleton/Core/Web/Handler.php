@@ -155,6 +155,14 @@ class Handler {
 			}
 		}
 
+		/**
+		 * Check for replays
+		 */
+		$replay = Security\Replay::get();
+		if ($replay->check() == false) {
+			$application->call_event('security', 'replay_detected');
+		}
+
 		if ($module !== null) {
 			$module->accept_request();
 		}
