@@ -490,7 +490,7 @@ class Application {
 		ksort($matched_applications_sorted);
 		$applications = array_pop($matched_applications_sorted);
 
-		if (count($applications) > 0) {
+		if (is_array($applications) && count($applications) > 0) {
 			// Get the most specific one
 			ksort($applications);
 			$application = array_pop($applications);
