@@ -40,10 +40,10 @@ abstract class Module {
 
 		// Bootstrap the application
 		$application = \Skeleton\Core\Application::get();
-		$application->call_event_if_exists('application', 'bootstrap', [ $this ]);
+		$application->call_event_if_exists('application', 'bootstrap', [$this]);
 
 		// If we have the skeleton-template package installed, find the template and set it up
-		if (class_exists('\Skeleton\Template\Template')) {
+		if (class_exists('\Skeleton\Template\Template') === true) {
 			$template = \Skeleton\Core\Web\Template::Get();
 			$template->add_environment('module', $this);
 			$template->add_environment('sticky_session', $sticky->get_as_array());
@@ -51,7 +51,7 @@ abstract class Module {
 
 		// Call our magic secure() method before passing on the request
 		$allowed = true;
-		if (method_exists($this, 'secure')) {
+		if (method_exists($this, 'secure') === true) {
 			$allowed = $this->secure();
 		}
 
@@ -60,9 +60,9 @@ abstract class Module {
 			$module_403 = strtolower(\Skeleton\Core\Config::$module_403);
 
 			// Always check if it can not be handled by an event first
-			if ($application->event_exists('module', 'access_denied')) {
-				$application->call_event_if_exists('module', 'access_denied', [ $this ]);
-			} elseif ($module_403 !== null and file_exists($application->module_path . '/' . $module_403 . '.php')) {
+			if ($application->event_exists('module', 'access_denied') === true) {
+				$application->call_event_if_exists('module', 'access_denied', [$this]);
+			} elseif ($module_403 !== null && file_exists($application->module_path . '/' . $module_403 . '.php') === true) {
 				require $application->module_path . '/' . $module_403 . '.php';
 				$classname = 'Web_Module_' . $module_403;
 				$module = new $classname;
@@ -75,7 +75,7 @@ abstract class Module {
 		}
 
 		// Call the teardown event if it exists
-		$application->call_event_if_exists('application', 'teardown', [ $this ]);
+		$application->call_event_if_exists('application', 'teardown', [$this]);
 	}
 
 	/**
@@ -88,8 +88,8 @@ abstract class Module {
 		$reflection = new \ReflectionClass($this);
 		$application = Application::Get();
 		$path = '/' . str_replace($application->module_path, '', $reflection->getFileName());
-		$path = str_replace('.php', '', $path);
-		return $path;
+
+		return str_replace('.php', '', $path);
 	}
 
 	/**
@@ -98,20 +98,24 @@ abstract class Module {
 	 * @access public
 	 */
 	public function handle_request() {
-		// Find out which method to call, fall back to calling displa()
-		if (isset($_REQUEST['action']) AND method_exists($this, 'display_' . $_REQUEST['action'])) {
-			if (class_exists('\Skeleton\Template\Template')) {
+		// Find out which method to call, fall back to calling display()
+		if (
+			isset($_REQUEST['action']) === true 
+			&& is_string($_REQUEST['action']) === true 
+			&& method_exists($this, 'display_' . $_REQUEST['action']) === true
+		) {
+			if (class_exists('\Skeleton\Template\Template') === true) {
 				$template = \Skeleton\Core\Web\Template::Get();
 				$template->assign('action', $_REQUEST['action']);
 			}
 
-			call_user_func([$this, 'display_'.$_REQUEST['action']]);
+			call_user_func([$this, 'display_' . $_REQUEST['action']]);
 		} else {
 			$this->display();
 		}
 
 		// If the module has defined a template, render it
-		if ($this->template !== null and $this->template !== false) {
+		if ($this->template !== null && $this->template !== false) {
 			$template = \Skeleton\Core\Web\Template::Get();
 			$template->display($this->template);
 		}
@@ -171,9 +175,11 @@ abstract class Module {
 		} catch (\Exception $e) { }
 
 		foreach ($classnames as $classname) {
-			if (class_exists($classname)) {
-				return new $classname;
+			if (class_exists($classname) === false) {
+				continue;
 			}
+			
+			return new $classname;
 		}
 
 		throw new \Exception('Module not found');
