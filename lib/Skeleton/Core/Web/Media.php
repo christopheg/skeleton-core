@@ -19,21 +19,13 @@ class Media {
 	 * @access protected
 	 */
 	protected static $filetypes = [
-		'image' => [
-			'gif',
-			'jpg',
-			'jpeg',
-			'png',
-			'ico',
-			'svg',
+		'css' => [
+			'css',
+			'map',
 		],
 		'doc' => [
 			'pdf',
 			'txt',
-		],
-		'css' => [
-			'css',
-			'map',
 		],
 		'font' => [
 			'woff',
@@ -42,6 +34,14 @@ class Media {
 			'otf',
 			'eot'
 		],
+		'image' => [
+			'gif',
+			'jpg',
+			'jpeg',
+			'png',
+			'ico',
+			'svg',
+		],
 		'javascript' => [
 			'js',
 		],
@@ -49,6 +49,9 @@ class Media {
 			'html',
 			'htm'
 		],
+		'video' => [
+			'mp4'
+		]
 	];
 
 	/**
