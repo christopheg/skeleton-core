@@ -88,11 +88,28 @@ class Media {
 	 */
 	public function __construct($request_uri) {
 		$this->request_uri = $request_uri;
-		try {
-			$this->path = $this->get_path();
-		} catch (\Exception $e) {
-			$this->fail();
+	}
+
+	/**
+	 * check for known extension
+	 *
+	 * @access public
+	 * @return known extension
+	 */
+	public function has_known_extension() {
+		$pathinfo = pathinfo($this->request_uri);
+		if (!isset($pathinfo['extension'])) {
+			return false;
 		}
+
+		$known_extension = false;
+		foreach (self::$filetypes as $filetype => $extensions) {
+			if (in_array($pathinfo['extension'], $extensions)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -101,47 +118,54 @@ class Media {
 	 * @access private
 	 */
 	private function get_path() {
-		$pathinfo = pathinfo($this->request_uri);
-		$filepaths = [];
+		if ($this->path === null) {
+			$pathinfo = pathinfo($this->request_uri);
+			$filepaths = [];
 
-		// Add the media_path from the current application
-		foreach (self::$filetypes as $filetype => $extensions) {
-			if (!in_array($pathinfo['extension'], $extensions)) {
-				continue;
-			}
-			$filepaths[] = Application::get()->media_path . '/' . $filetype . '/' . $pathinfo['dirname'] . '/' . $pathinfo['basename'];
-		}
-
-		// Add the global asset directory
-		$filepaths[] = \Skeleton\Core\Config::$asset_dir . '/' . $pathinfo['dirname'] . '/' . $pathinfo['basename'];
-
-		// Add the asset path of every package
-		$packages = \Skeleton\Core\Package::get_all();
-
-		foreach ($packages as $package) {
-			$path_parts = explode('/', $this->request_uri);
-			if (!isset($path_parts[0]) or $path_parts[0] != $package->name) {
-				continue;
-			}
-
+			// Add the media_path from the current application
 			foreach (self::$filetypes as $filetype => $extensions) {
 				if (!in_array($pathinfo['extension'], $extensions)) {
 					continue;
 				}
+				$filepaths[] = Application::get()->media_path . '/' . $filetype . '/' . $pathinfo['dirname'] . '/' . $pathinfo['basename'];
+			}
 
-				unset($path_parts[0]);
-				$package_path = $package->asset_path . '/' . $filetype . '/' . $pathinfo['dirname'] . '/' . $pathinfo['basename'];
-				$filepaths[] = $package_path;
+			// Add the global asset directory
+			$filepaths[] = \Skeleton\Core\Config::$asset_dir . '/' . $pathinfo['dirname'] . '/' . $pathinfo['basename'];
+
+			// Add the asset path of every package
+			$packages = \Skeleton\Core\Package::get_all();
+
+			foreach ($packages as $package) {
+				$path_parts = explode('/', $this->request_uri);
+				if (!isset($path_parts[0]) or $path_parts[0] != $package->name) {
+					continue;
+				}
+
+				foreach (self::$filetypes as $filetype => $extensions) {
+					if (!in_array($pathinfo['extension'], $extensions)) {
+						continue;
+					}
+
+					unset($path_parts[0]);
+					$package_path = $package->asset_path . '/' . $filetype . '/' . $pathinfo['dirname'] . '/' . $pathinfo['basename'];
+					$filepaths[] = $package_path;
+				}
+			}
+
+			// Search for the file in order provided in $filepaths
+			foreach ($filepaths as $filepath) {
+				if (file_exists($filepath)) {
+					$this->path = $filepath;
+				}
+			}
+
+			if ($this->path === null) {
+				throw new \Exception('File not found');
 			}
 		}
 
-		// Search for the file in order provided in $filepaths
-		foreach ($filepaths as $filepath) {
-			if (file_exists($filepath)) {
-				return $filepath;
-			}
-		}
-		throw new \Exception('File not found');
+		return $this->path;
 	}
 
 	/**
@@ -151,7 +175,7 @@ class Media {
 	 */
 	public function serve() {
 		// Send the Etag before potentially replying with 304
-		header('Etag: ' . crc32($this->get_mtime()) . '-' . sha1($this->path));
+		header('Etag: ' . crc32($this->get_mtime()) . '-' . sha1($this->get_path()));
 		$this->http_if_modified();
 		$this->serve_cache();
 		$this->serve_content();
@@ -190,7 +214,7 @@ class Media {
 	 * @access private
 	 */
 	private function serve_content() {
-		$filename = $this->path;
+		$filename = $this->get_path();
 		$filesize = filesize($filename);
 
 		$mimetype = $this->get_mime_type();
@@ -378,8 +402,8 @@ class Media {
 	 */
 	private function get_mtime() {
 		if ($this->mtime === null) {
-			clearstatcache(true, $this->path);
-			$this->mtime = filemtime($this->path);
+			clearstatcache(true, $this->get_path());
+			$this->mtime = filemtime($this->get_path());
 		}
 
 		return $this->mtime;
@@ -466,6 +490,9 @@ class Media {
 		}
 
 		$media = new self($request_uri);
+		if (!$media->has_known_extension()) {
+			return;
+		}
 		$media->serve();
 	}
 }
