@@ -223,7 +223,7 @@ class Csrf {
 
 		// We only validate POST requests
 		// This is probably not the most complete implementation, but let's agree that GET requests should never modify data and we're mostly covered
-		if (!empty($_POST)) {
+		if (getenv('REQUEST_METHOD') === 'POST') {
 			if (empty($submitted_token) || $_SESSION[$this->session_token_name] !== $submitted_token) {
 				if ($application->event_exists('security', 'csrf_validate_failed')) {
 					return $application->call_event('security', 'csrf_validate_failed');
