@@ -161,7 +161,7 @@ class Media {
 			}
 
 			if ($this->path === null) {
-				throw new \Exception('File not found');
+				return self::fail();
 			}
 		}
 
@@ -462,12 +462,12 @@ class Media {
 	 *
 	 * @access protected
 	 */
-	private function fail() {
+	private static function fail() {
 		$application = \Skeleton\Core\Application::get();
 		if ($application->event_exists('media', 'not_found')) {
 			$application->call_event_if_exists('media', 'not_found', [ ]);
 		} else {
-			HTTP\Status::code_404('media');
+			throw new \Exception('File not found');
 		}
 	}
 
