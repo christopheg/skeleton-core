@@ -19,7 +19,7 @@ class Media {
 	 * @access private
 	 * @var string $request_uri
 	 */
-	private $request_uri = null;
+	protected $request_uri = null;
 
 	/**
 	 * Path
@@ -27,7 +27,7 @@ class Media {
 	 * @access private
 	 * @var string $path
 	 */
-	private $path = null;
+	protected $path = null;
 
 	/**
 	 * Mtime
@@ -35,7 +35,7 @@ class Media {
 	 * @access private
 	 * @var int $mtime
 	 */
-	private $mtime = null;
+	protected $mtime = null;
 
 	/**
 	 * Image extensions
@@ -117,7 +117,7 @@ class Media {
 	 *
 	 * @access private
 	 */
-	private function get_path() {
+	protected function get_path() {
 		if ($this->path === null) {
 			$pathinfo = pathinfo($this->request_uri);
 			$filepaths = [];
@@ -489,7 +489,8 @@ class Media {
 			return;
 		}
 
-		$media = new self($request_uri);
+		$classname = get_called_class();
+		$media = new $classname($request_uri);
 		if (!$media->has_known_extension()) {
 			return;
 		}
