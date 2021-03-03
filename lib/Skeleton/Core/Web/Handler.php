@@ -80,7 +80,11 @@ class Handler {
 		 * Handle the media
 		 */
 		if (isset($application->config->detect_media) AND $application->config->detect_media === true OR !isset($application->config->detect_media)) {
-			Media::detect($application->request_relative_uri);
+			try {
+				Media::detect($application->request_relative_uri);
+			} catch (\Skeleton\Core\Exception\Media\Not\Found $e) {
+				HTTP\Status::code_404('media');
+			}
 		}
 
 		/**
