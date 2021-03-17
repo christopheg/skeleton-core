@@ -250,7 +250,7 @@ class Media {
 					$this->serve_content_set_range($range, $filesize, $first, $last);
 					$content_length += strlen("\r\n--" . $boundary . "\r\n");
 					$content_length += strlen('Content-Type: ' . $mimetype . "\r\n");
-					$content_length += strlen('Content-Range: bytes ' . $first - $last / $filesize . "\r\n\r\n");
+					$content_length += strlen('Content-Range: bytes ' . $first . '-' . $last . '/' . $filesize . "\r\n\r\n");
 					$content_length += $last - $first + 1;
 				}
 
