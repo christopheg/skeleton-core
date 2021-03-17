@@ -71,7 +71,19 @@ abstract class Module {
 				throw new \Exception('Access denied');
 			}
 		} else {
+
+			// Call the bootstrap method if it exists
+			if (method_exists($this, 'bootstrap') === true) {
+				$this->bootstrap();
+			}
+
+			// Handle request
 			$this->handle_request();
+
+			// Call the teardown method if it exists
+			if (method_exists($this, 'teardown') === true) {
+				$this->teardown();
+			}
 		}
 
 		// Call the teardown event if it exists
@@ -100,8 +112,8 @@ abstract class Module {
 	public function handle_request() {
 		// Find out which method to call, fall back to calling display()
 		if (
-			isset($_REQUEST['action']) === true 
-			&& is_string($_REQUEST['action']) === true 
+			isset($_REQUEST['action']) === true
+			&& is_string($_REQUEST['action']) === true
 			&& method_exists($this, 'display_' . $_REQUEST['action']) === true
 		) {
 			if (class_exists('\Skeleton\Template\Template') === true) {
@@ -178,7 +190,7 @@ abstract class Module {
 			if (class_exists($classname) === false) {
 				continue;
 			}
-			
+
 			return new $classname;
 		}
 
