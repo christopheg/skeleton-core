@@ -137,8 +137,8 @@ class Media {
 			$packages = \Skeleton\Core\Package::get_all();
 
 			foreach ($packages as $package) {
-				$path_parts = explode('/', $this->request_uri);
-				if (!isset($path_parts[0]) or $path_parts[0] != $package->name) {
+				$path_parts = array_values(array_filter(explode('/', $this->request_uri)));
+				if (!isset($path_parts[0]) || $path_parts[0] != $package->name) {
 					continue;
 				}
 
