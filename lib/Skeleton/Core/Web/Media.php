@@ -148,7 +148,7 @@ class Media {
 					}
 
 					unset($path_parts[0]);
-					$package_path = $package->asset_path . '/' . $filetype . '/' . $pathinfo['dirname'] . '/' . $pathinfo['basename'];
+					$package_path = $package->asset_path . '/' . $filetype . '/' . $pathinfo['basename'];
 					$filepaths[] = $package_path;
 				}
 			}
