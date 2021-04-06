@@ -128,7 +128,7 @@ class Application {
 		$application_path = realpath(Config::$application_dir . '/' . $this->name);
 
 		if (!file_exists($application_path)) {
-			throw new Exception('Application with name "' . $this->name . '" not found');
+			throw new \Exception('Application with name "' . $this->name . '" not found');
 		}
 		$this->path = $application_path;
 
@@ -534,4 +534,54 @@ class Application {
 	public static function get_by_name($name) {
 		return new self($name);
 	}
+
+	/**
+	 * Create an app
+	 *
+	 * @access public
+	 * @param string $name
+	 * @return Application $application
+	 */
+	public static function create($name, $settings) {
+		$name = strtolower($name);
+		$application_path = realpath(Config::$application_dir);
+
+		if (!file_exists($application_path)) {
+			throw new \Exception('There is no application path defined. Please specificy a path in \Skeleton\Core\Config::$application_dir');
+		}
+
+		if (file_exists($application_path . '/' . $name)) {
+			throw new \Exception('There is already an app with this name created');
+		}
+
+		// Create the required directories
+		mkdir($application_path . '/' . $name);
+		mkdir($application_path . '/' . $name . '/config');
+		mkdir($application_path . '/' . $name . '/media');
+		mkdir($application_path . '/' . $name . '/module');
+		mkdir($application_path . '/' . $name . '/template');
+		mkdir($application_path . '/' . $name . '/event');
+
+		$root_path = dirname(__FILE__) . '/../../../';
+
+		$config = file_get_contents($root_path . '/template/config/Config.php.tpl');
+		$config = str_replace('%%APP_NAME%%', ucfirst($name), $config);
+
+		foreach ($settings['hostnames'] as $key => $hostname) {
+			$settings['hostnames'][$key] = "'" . $hostname . "'";
+		}
+
+		$config = str_replace('%%HOSTNAMES%%', '[' . implode(', ', $settings['hostnames']) . ']', $config);
+		file_put_contents($application_path . '/' . $name . '/config/Config.php', $config);
+
+		$module = file_get_contents($root_path . '/template/module/index.php.tpl');
+		file_put_contents($application_path . '/' . $name . '/module/index.php', $module);
+
+		$template = file_get_contents($root_path . '/template/template/index.twig.tpl');
+		file_put_contents($application_path . '/' . $name . '/template/index.twig', $template);
+
+		return self::get_by_name($name);
+	}
+
+
 }
