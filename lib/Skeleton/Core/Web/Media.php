@@ -131,7 +131,8 @@ class Media {
 			}
 
 			// Add the global asset directory
-			$filepaths[] = \Skeleton\Core\Config::$asset_dir . '/' . $pathinfo['dirname'] . '/' . $pathinfo['basename'];
+			$config = \Skeleton\Core\Config::get();
+			$filepaths[] = $config->asset_dir . '/' . $pathinfo['dirname'] . '/' . $pathinfo['basename'];
 
 			// Add the asset path of every package
 			$packages = \Skeleton\Core\Package::get_all();

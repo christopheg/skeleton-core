@@ -69,9 +69,7 @@ class Replay {
 		}
 
 		// Disable the replay check if the configuration tells us to
-		if (\Skeleton\Core\Config::$replay_enabled === false) {
-			$this->enabled = false;
-		} elseif (isset($application->config->replay_enabled) && $application->config->replay_enabled === false) {
+		if ($application->config->replay_enabled === false) {
 			$this->enabled = false;
 		}
 	}
