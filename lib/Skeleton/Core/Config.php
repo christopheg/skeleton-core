@@ -53,7 +53,7 @@ class Config {
 	 * Get config vars as properties
 	 *
 	 * @param string name
-	 * @param mixed value	 
+	 * @param mixed value
 	 * @access public
 	 */
 	public function __set($name, $value) {
@@ -137,9 +137,9 @@ class Config {
 		}
 
 		if (file_exists($directory . DIRECTORY_SEPARATOR . 'environment.php')) {
-			$this->read_file($directory . DIRECTORY_SEPARATOR . 'environment.php');			
+			$this->read_file($directory . DIRECTORY_SEPARATOR . 'environment.php');
 		}
-	}	
+	}
 
 
 	/**

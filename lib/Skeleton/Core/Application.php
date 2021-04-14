@@ -29,28 +29,12 @@ class Application {
 	public $path = null;
 
 	/**
-	 * Media Path
+	 * Event Path
 	 *
-	 * @var string $media_path
+	 * @var string $event_path
 	 * @access public
 	 */
-	public $media_path = null;
-
-	/**
-	 * Module Path
-	 *
-	 * @var string $module_path
-	 * @access public
-	 */
-	public $module_path = null;
-
-	/**
-	 * Template path
-	 *
-	 * @var string $template_path
-	 * @ccess public
-	 */
-	public $template_path = null;
+	public $event_path = null;
 
 	/**
 	 * Name
@@ -133,13 +117,9 @@ class Application {
 			throw new \Exception('Application with name "' . $this->name . '" not found');
 		}
 		$this->path = $application_path;
+		$this->event_path = $this->path . '/event/';
 
 		$this->load_config();
-
-		$this->media_path = $application_path . '/media/';
-		$this->module_path = $application_path . '/module/';
-		$this->template_path = $application_path . '/template/';
-		$this->event_path = $application_path . '/event/';
 
 		if (class_exists('\Skeleton\I18n\Config') AND isset(\Skeleton\I18n\Config::$language_interface)) {
 			$classname = \Skeleton\I18n\Config::$language_interface;
@@ -164,7 +144,7 @@ class Application {
 		 * Set some defaults
 		 */
 		$this->config->application_type = '\Skeleton\Core\Application\Web';
-		
+
 		$this->config->read_directory($this->path . '/config');
 	}
 

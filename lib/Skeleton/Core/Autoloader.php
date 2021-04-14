@@ -72,6 +72,17 @@ class Autoloader {
 	}
 
 	/**
+	 * Search for a namespace in a given path
+	 *
+	 * @access public
+	 * @param string $namespace
+	 * @param string $path
+	 */
+	public function add_namespace($namespace, $path) {
+		$this->namespaces[$namespace] = $path;
+	}	
+
+	/**
 	 * Gets the loaded include paths.
 	 *
 	 * @return string $include_path
@@ -80,9 +91,7 @@ class Autoloader {
 		return $this->include_paths;
 	}
 
-	public function add_namespace($namespace, $path) {
-		$this->namespaces[$namespace] = $path;
-	}
+
 
 	/**
 	 * Sets the file extension of class files in the namespace of this class loader.
@@ -124,10 +133,15 @@ class Autoloader {
 	 */
 	public function load_class($class_name) {
 		foreach ($this->namespaces as $namespace => $namespace_path) {
-			$file_path = str_replace(' ', '/', ucwords(str_replace('_', ' ', str_replace('\\', ' ', strtolower($class_name))))) . '.php';
-			$path = $namespace_path . '/' . substr($file_path, strpos('/', $file_path));
+			if (strpos('\\' . strtolower($class_name), strtolower($namespace)) !== 0) {
+				continue;
+			}
+			
+			$file_path = str_replace(' ', DIRECTORY_SEPARATOR, ucwords(str_replace('\\', ' ', str_replace(strtolower($namespace), '', '\\' . strtolower($class_name))))) . '.php';
+			$file_path = $namespace_path . DIRECTORY_SEPARATOR . $file_path;
+
 			try {
-				$this->require_file($path);
+				$this->require_file($file_path);
 
 				if (class_exists($class_name, false)) {
 					class_parents($class_name, true);

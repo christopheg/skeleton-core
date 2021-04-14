@@ -15,6 +15,44 @@ use \Skeleton\Core\Web\Module;
 class Web extends \Skeleton\Core\Application {
 
 	/**
+	 * Media Path
+	 *
+	 * @var string $media_path
+	 * @access public
+	 */
+	public $media_path = null;
+
+	/**
+	 * Module Path
+	 *
+	 * @var string $module_path
+	 * @access public
+	 */
+	public $module_path = null;
+
+	/**
+	 * Template path
+	 *
+	 * @var string $template_path
+	 * @ccess public
+	 */
+	public $template_path = null;
+
+	/**
+	 * Get details
+	 *
+	 * @access protected
+	 */
+	protected function get_details() {
+		parent::get_details();
+		
+		$this->media_path = $this->path . '/media/';
+		$this->module_path = $this->path . '/module/';
+		$this->template_path = $this->path . '/template/';
+	}
+
+
+	/**
 	 * Load the config
 	 *
 	 * @access private
