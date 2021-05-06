@@ -10,7 +10,7 @@ namespace Skeleton\Core;
 
 class Exception_Unknown_Application extends \Exception {}
 
-class Application {
+abstract class Application {
 
 	/**
 	 * Application
@@ -149,6 +149,13 @@ class Application {
 	}
 
 	/**
+	 * Run the application
+	 *
+	 * @access public
+	 */
+	abstract public function run();
+
+	/**
 	 * Check if an event exists
 	 *
 	 * @access public
@@ -225,8 +232,6 @@ class Application {
 	public function get_event_callable(string $context, string $action) {
 		return [$this->events[$context], $action];
 	}
-
-
 
 	/**
 	 * Get
@@ -397,7 +402,7 @@ class Application {
 	 * @return Application $application
 	 */
 	public static function get_by_name($name) {
-		$application = new self($name);
+		$application = new Application\Web($name);
 		$config = $application->config;
 		$application_type = $config->application_type;
 		return new $application_type($name);
@@ -450,6 +455,5 @@ class Application {
 
 		return self::get_by_name($name);
 	}
-
 
 }

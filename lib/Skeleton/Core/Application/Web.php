@@ -71,6 +71,10 @@ class Web extends \Skeleton\Core\Application {
 		$this->config->module_default = 'index';
 		$this->config->module_404 = '404';
 		$this->config->sticky_pager = false;
+		$this->config->base_uri = '/';
+		$this->config->route_resolver = function($path) {
+			return \Skeleton\Core\Application\Web\Module::resolve($path);
+		};
 
 		parent::load_config();
 	}
@@ -193,10 +197,6 @@ class Web extends \Skeleton\Core\Application {
 
 		if (substr($request_uri, -1) == '/') {
 			$request_uri = substr($request_uri, 0, strlen($request_uri)-1);
-		}
-
-		if (!isset($this->config->base_uri)) {
-			$this->config->base_uri = '/';
 		}
 
 		if (strpos( '/' . $request_uri, $this->config->base_uri) === 0) {

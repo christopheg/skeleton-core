@@ -122,12 +122,16 @@ class Media {
 			$pathinfo = pathinfo($this->request_uri);
 			$filepaths = [];
 
+			$application = Application::get();
+
 			// Add the media_path from the current application
-			foreach (self::$filetypes as $filetype => $extensions) {
-				if (!in_array($pathinfo['extension'], $extensions)) {
-					continue;
+			if (isset($application->media_path)) {
+				foreach (self::$filetypes as $filetype => $extensions) {
+					if (!in_array($pathinfo['extension'], $extensions)) {
+						continue;
+					}
+					$filepaths[] = $application->media_path . '/' . $filetype . '/' . $pathinfo['dirname'] . '/' . $pathinfo['basename'];
 				}
-				$filepaths[] = Application::get()->media_path . '/' . $filetype . '/' . $pathinfo['dirname'] . '/' . $pathinfo['basename'];
 			}
 
 			// Add the global asset directory
@@ -135,7 +139,7 @@ class Media {
 			$filepaths[] = $config->asset_dir . '/' . $pathinfo['dirname'] . '/' . $pathinfo['basename'];
 
 			// Add the asset path of every package
-			$packages = \Skeleton\Core\Package::get_all();
+			$packages = \Skeleton\Core\Skeleton::get_all();
 
 			foreach ($packages as $package) {
 				$path_parts = array_values(array_filter(explode('/', $this->request_uri)));

@@ -73,11 +73,7 @@ class Skeleton {
 					continue;
 				}
 
-				if (strpos($name, 'skeleton-package') === 0) {
-					$skeleton = new Package();
-				} else {
-					$skeleton = new self();
-				}
+				$skeleton = new self();
 				$skeleton->name = $name;
 				$skeleton->path = $composer_dir . '/tigron/' . $name;
 				$skeleton->template_path = $composer_dir . '/tigron/' . $name . '/template';

@@ -69,7 +69,7 @@ class Replay {
 		}
 
 		// Disable the replay check if the configuration tells us to
-		if ($application->config->replay_enabled === false) {
+		if (isset($application->config->replay_enabled) and $application->config->replay_enabled === false) {
 			$this->enabled = false;
 		}
 	}

@@ -116,27 +116,30 @@ class Util {
 			$url['path'] = substr($url['path'], 1);
 		}
 
-		$module_name = null;
+		$classname = null;
 
-
-		if ($module_name === null) {
-			$module_name = 'web_module_' . str_replace('/', '_', $url['path']);
+		try {
+			$closure = $application->config->route_resolver;
+			$classname = '\\' . get_class($closure($url['path']));
+		} catch (\Exception $e) {
+			// No suitable classname found, reverse rewrite not possible
 		}
+
 
 		$module_defined = false;
 
-		if (isset($routes[$module_name])) {
+		if (isset($routes[$classname])) {
 			$module_defined = true;
-		} elseif (isset($routes[$module_name . '_index'])) {
+/*		} elseif (isset($routes[$module_name . '_index'])) {
 			$module_name = $module_name . '_index';
-			$module_defined = true;
+			$module_defined = true;*/
 		}
 
 		if (!$module_defined) {
 			return $url_raw;
 		}
 
-		$routes = $routes[$module_name];
+		$routes = $routes[$classname];
 
 		$correct_route = null;
 		$correct_route_params_matches = 0;
