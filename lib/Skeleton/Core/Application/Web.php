@@ -10,7 +10,7 @@ namespace Skeleton\Core\Application;
 
 use \Skeleton\Core\Web\Session;
 use \Skeleton\Core\Web\Media;
-use \Skeleton\Core\Web\Module;
+use \Skeleton\Core\Application\Web\Module;
 
 class Web extends \Skeleton\Core\Application {
 
@@ -31,6 +31,14 @@ class Web extends \Skeleton\Core\Application {
 	public $module_path = null;
 
 	/**
+	 * Module namespace
+	 *
+	 * @access public
+	 * @var string $module_namespace
+	 */
+	public $module_namespace = null;
+
+	/**
 	 * Template path
 	 *
 	 * @var string $template_path
@@ -47,8 +55,13 @@ class Web extends \Skeleton\Core\Application {
 		parent::get_details();
 		
 		$this->media_path = $this->path . '/media/';
-		$this->module_path = $this->path . '/module/';
 		$this->template_path = $this->path . '/template/';
+		$this->module_path = $this->path . '/module/';
+		$this->module_namespace = "\\App\\" . ucfirst($this->name) . "\Module\\";
+
+		$autoloader = new \Skeleton\Core\Autoloader();
+		$autoloader->add_namespace($this->module_namespace, $this->module_path);
+		$autoloader->register();
 	}
 
 
@@ -114,12 +127,12 @@ class Web extends \Skeleton\Core\Application {
 		} catch (\Exception $e) {
 			try {
 				// Attempt to find a module by matching paths
-				$module = Module::get($this->request_relative_uri);
+				$module = Module::resolve($this->request_relative_uri);
 			} catch (\Exception $e) {
 				if ($this->event_exists('module', 'not_found')) {
 					$this->call_event_if_exists('module', 'not_found');
 				} else {
-					HTTP\Status::code_404('module');
+					\Skeleton\Core\Web\HTTP\Status::code_404('module');
 				}
 			}
 		}

@@ -65,6 +65,11 @@ class Skeleton {
 			$installed = file_get_contents($composer_dir . '/composer/installed.json');
 			$installed = json_decode($installed);
 
+			// The structure of the installed.json file in composer 2 is slightly different
+			if (isset($installed->packages)) {
+				$installed = $installed->packages;
+			}
+
 			$skeletons = [];
 			foreach ($installed as $install) {
 				$package = $install->name;
