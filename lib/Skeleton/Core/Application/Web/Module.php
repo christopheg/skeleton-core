@@ -148,11 +148,12 @@ abstract class Module {
 	 * @access public
 	 */
 	public function get_name() {
-		if (strpos(get_class($this), 'Web_Module_') !== false) {
-			return strtolower(substr(get_class($this), strlen('Web_Module_')));
-		}
+		$application = Application::get();
+		$module_namespace = $application->module_namespace;
 
-		return strtolower(get_class($this));
+		$module_name = str_replace($module_namespace, '', '\\' . get_class($this));
+		$module_name = str_replace('\\', '_', $module_name);
+		return \strtolower($module_name);
 	}
 
 	/**
