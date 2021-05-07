@@ -152,15 +152,15 @@ The following optional configurations can be set:
 All PHP classes in your Skeleton application should be whitin your Application
 Namespace, which is:
 
-   \App\APP_NAME\
+	\App\APP_NAME\
 
 For modules, the specific namespace is
 
-   \App\APP_NAME\Module
+	\App\APP_NAME\Module
 
 For events, the specific namespace is
 
-   \App\APP_NAME\Event
+	\App\APP_NAME\Event
 
 
 ### routes
