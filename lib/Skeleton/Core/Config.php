@@ -130,6 +130,12 @@ class Config {
 			if (!$item->isFile()) {
 				continue;
 			}
+
+			if ($item->getExtension() != 'php') {
+				// ignore non-php files
+				continue;
+			}
+
 			if ($item == 'environment.php') {
 				continue;
 			}
