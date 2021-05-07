@@ -31,24 +31,75 @@ Installation via composer:
 
     composer require tigron/skeleton-core
 
-## Configuration
+After installation you can start a skeleton project.
 
-### Start
+## Getting ready
 
-Initialize the application directory
+Skeleton core offers a Config object that is populated from a given config
+directory. The Config object automatically includes all php files which are
+stored in the config directory. Each php file should return a php array.
+Each key/value pair will be available in your project.
 
-    \Skeleton\Core\Config::$application_dir = $some_very_cool_directory;
+Include a config directory
 
-From then on, every directory in your `/app/` folder will be seen as a fully
-independent `\Skeleton\Core\Application`.
+    \Skeleton\Core\Config::include_directory('/config');
 
-Within your `/app/<app name>`/ folder, you are expected to adhere to the
-structure below.
+PHP files stored in the config directory will be evaluated in alphabetical
+order. In case you have environment-specific configuration, you can create a
+file `environment.php` in your config directory which will be evaluated last.
+
+Get a config object
+
+	$config = \Skeleton\Core\Config::get();
+
+Skeleton needs at least these config items to operate properly:
+
+	'application_dir': The root directory where skeleton can find Skeleton
+	Applications
+
+Your webserver should rewrite every request to a single PHP file. This file
+will start your skeleton project. It should include at least the following
+
+    \Skeleton\Core\Config::include_directory('config');
+    \Skeleton\Core\Web\Handler::Run();
+
+Altough a skeleton project can have any desired directory structure, we
+encourage to use the following:
+
+    - app
+    - config
+    - lib
+      - model
+      - external
+        - package
+        - asset
+
+If more skeleton packages are installed, this structure can easily be extended
+to support additional features (file storage/translations/migrations/...)
+
+## Applications
+
+The application dir will automatically be scanned for Skeleton Applications.
+Each subdirectory will be seen as a fully independent \Skeleton\Core\Application
+
+There are various types of applications. Skeleton-core includes the most-used:
+
+	\Skeleton\Core\Application\Web
+
+Other applications are available via skeleton packages (eg 	
+[skeleton-application-api](https://github.com/tigron/skeleton-application-api)
+
+A Skeleton Application\Web is a common application that handles any type of
+web interface. It has modules/templates/events and can contain its own
+media.
+For an Application\Web to work properly, it is important to respect the correct
+directory structure within the application:
 
     - app
       - your application's folder
         - config
-          - Config.php
+          - application_config1.php
+          - application_config2.php
         - event
         - module
         - template
@@ -62,75 +113,57 @@ if you have a package manager such as `bower`, `yarn` or even the
 `fxp/composer-asset-plugin`, you can specify an additional directory which will
 be searched in addition to the default `media` one.
 
-    \Skeleton\Core\Config::$asset_dir = $my_frontend_library_directory;
+To enable media serving from an additional asset directory, include the
+following configuration directive in your skeleton project:
+
+	'asset_dir': The asset directory where media files can be served from if
+	they are not found in your application.
 
 
-### Config.php
+### Application configuration
 
-The application's configuration is done by means of the `Config.php` file, found
-in `app/<app name>/config`. It should have the following structure:
+Applications can have their own configuration. The application's configuration
+is done via configuration files placed in the `config` directory of your app.
+Similar as the global project configuration, every PHP file will be evaluated
+in alphabetical order and should return an array with configuration directives.
+If you have environment-specific configurations, they can be included in
+`environment.php` which will be evaluated last.
 
-    <?php
-    /**
-     * Sample application configuration class
-     */
+The following optional configurations can be set:
 
-    class Config_Admin extends Config {
+|Configuration|Description|Default value|Example values|
+|----|----|----|----|
+|hostnames|(required)an array containing the hostnames to listen for. Wildcards can be used via `*`.| []| [ 'www.example.be, '*.example.be' ]|
+|base_uri|Specifies the base uri for the application. If a base_uri is specified, it will be included in the reverse url generation|'/'|'/v1'|
+|default_language|This is the ISO 639-1 code for the default language to be used, if no more specific one can be found|'en'|'en', 'nl', any language iso2 code provided by skeleton-i18n|	
+|session_name|The name given to your session|'App'|any string|
+|sticky_session_name|The key in your session where sticky session information is stored|'sys_sticky_session'|any string|
+|csrf_enabled|Enable CSRF|false|true/false|
+|replay_enabled|Prevent replay attack|false|true/false|
+|hostnames|Array with hostnames that should be handled by the application|[]|array with any hostname(s)|
+|routes|Array with route information|[]| See routes |
+|module_default|The default module to search for|'index'||
+|module_404|The 404 module on fallback when no module is found|'404'||
+|sticky_pager|Enable sticky pager|false|Only available if [skeleton-pager](https://github.com/tigron/skeleton-pager) is installed|
+|route_resolver|Closure to provide module resolving based on requested path|Internal module resolver||
 
-    	/**
-    	 * Config array
-    	 *
-    	 * @var array
-    	 * @access private
-    	 */
-    	protected $config_data = [
+### Application namespaces
 
-    		/**
-    		 * Hostnames
-    		 */
-    		'hostnames' => ['*'],
+All PHP classes in your Skeleton application should be whitin your Application
+Namespace, which is:
 
-    		/**
-    		 * base_uri
-    		 */
-    		'base_uri' => '',
+   \App\APP_NAME\
 
-    		/**
-    		 * Default language. If no language is requested
-    		 */
-    		'default_language' => 'en',
+For modules, the specific namespace is
 
-    		/**
-    		 * Routes
-    		 */
-    		'routes' => []
-    	];
-    }
+   \App\APP_NAME\Module
 
-In addition to any setting you define yourself, the following options can be set
-through this configuration file and will be taken into account by
-`skeleton-core`:
+For events, the specific namespace is
 
-#### hostnames
+   \App\APP_NAME\Event
 
-An array of hostnames for which this application will handle requests. An
-asterisk can be used as a wildcard. Example:
 
-    [ 'admin.test.example.be', 'admin.*.example.be' ]
-
-#### base_uri
-
-Specifies the base uri for the application. If a base_uri is specified, it will
-be included in the reverse url generation. Example:
-
-    '/admin'
-
-#### default_language
-
-This is the ISO 639-1 code for the default language to be used, if no more
-specific one can be found.
-
-#### routes
+### routes
 
 An array which maps `routes` to `modules`. A route definition cab be used to
 generate pretty URL's, or even translated versions. Usage is best described by
@@ -147,9 +180,9 @@ an example.
             ],
     ],
 
-## Usage
+### Usage
 
-### Routing to the correct application
+#### Routing to the correct application
 
 Based on the `Host`-header in the request, the correct application will be
 started. This is where the `hostnames` array in the application's configuration
@@ -162,25 +195,26 @@ If your application has `base_uri` configured, that will be taken into account
 as well. For example: the application for a CMS can be distinguished by setting
 its `base_uri` to `/admin`.
 
-### Routing to the correct module
+#### Routing to the correct module
 
 Requests that do not have a file extension and thus do not match a `media` file,
 will be routed to a module and a matching method. The module is determined based
 on the request URI, excluding all $_GET parameters. The module is a class that
-should be derived from `\Skeleton\Core\Web\Module`.
+should be derived from `\Skeleton\Core\Application\Web\Module`.
 
 This can be best explained with some examples:
 
 | requested uri    | classname                  | filename             |
 | ---------------- | -------------------------- | -------------------- |
-| /user/management | Web_Module_User_Management | /user/management.php |
-| /                | Web_Module_Index           | /index.php           |
-| /user            | Web_Module_User            | /user.php            |
-| /user            | Web_Module_User_Index      | /user/index.php      |
+| /user/management | \App\APP_NAME\Module\User\Management | /user/management.php |
+| /                | \App\APP_NAME\Module\Index           | /index.php           |
+| /user            | \App\APP_NAME\Module\User            | /user.php            |
+| /user            | \App\APP_NAME\Module\User\Index      | /user/index.php      |
 
 As you can see in the last two examples, the `index` modules are a bit special,
 in that they can be used instead of the underlying one if they sit in a
-subfolder.
+subfolder. The `index` is configurable via configuration directive 
+`module_default`
 
 ### Routing to the correct method
 
@@ -192,8 +226,8 @@ Some examples:
 
 | requested uri    | classname           | method               |
 | -------------    | ---------           | --------             |
-| /user            | Web_Module_User     | display()            |
-| /user?action=test| Web_Module_User     | display_test()       |
+| /user            | \App\APP_NAME\Module\User     | display()            |
+| /user?action=test| \App\APP_NAME\Module\User     | display_test()       |
 
 ### Handling of media files
 
@@ -201,7 +235,8 @@ If the requested url contains an extension which matches a known media type, the
 requested file will be served from the `media/` directory of the application.
 
 If the requested media file could not be found, `skeleton-core` will search for
-a matching file in the folder specified by `Config::$asset_dir` (if any).
+a matching file in the folder specified by configuration directive `asset_dir`
+(if any).
 
 ### CSRF
 
@@ -211,14 +246,11 @@ been defined, with which you can control the CSRF flow. A list of these events
 can be found further down.
 
 CSRF is disabled globally by default. If you would like to enable it, simply
-flip the `csrf_enabled` flag to true, for example in your global
-`Bootstrap::boot()` method.
-
-    \Skeleton\Core\Config::$csrf_enabled = true;
+flip the `csrf_enabled` flag to true, via configuration directive `csrf_enabled`
 
 Once enabled, it is enabled for all your applications. If you want to disable it
 for specific applications only, flip the `csrf_enabled` flag to `false` in the
-application's `config/Config.php`.
+application's configuration.
 
 Several events are available to control the CSRF behaviour, these have been
 documented below.
@@ -266,9 +298,7 @@ The built-in replay detection tries to work around duplicate form submissions by
 users double-clicking the submit button. Often, this is not caught in the UI.
 
 Replay detection is disabled by default, if you would like to enable it, flip
-the `replay` enabled flag to true. Example in `Bootstrap::boot()`:
-
-    \Skeleton\Core\Config::$replay_enabled = true;
+the `replay_enabled` configuration directive to true.
 
 You can disable replay detection for individual applications by setting the
 `replay_enabled` flag to `false` in their respective configuration.
@@ -288,13 +318,13 @@ Events can be created to perform a task at specific key points during the
 application's execution.
 
 Events are defined in `Event` context classes. These classes are optional, but
-when they are used, they should be located in the `event` directory. The
-filename should be in the form of `Context_name.php`, for example
-`Application.php`.
+when they are used, they should be located in the `event` directory of your 
+application. The filename should be in the form of `Context_name.php`, for 
+example `Application.php`.
 
 The class should extend from `Skeleton\Core\Event` and the classname should be
-within the namespace `\App\Your_application\Event\Context`, where
-`Your_application` is the name of your application, and `Context` is one of the
+within the namespace `\App\APP_NAME\Event\Context`, where
+`APP_NAME` is the name of your application, and `Context` is one of the
 available contexts:
 
 - Application
