@@ -27,9 +27,9 @@ class Session {
 		$application = \Skeleton\Core\Application::get();
 		$application->call_event_if_exists('security', 'session_cookie');
 
-		session_name(\Skeleton\Core\Config::$session_name);
+		session_name($application->config->session_name);
 
-		if (isset($_COOKIE[\Skeleton\Core\Config::$session_name])) {
+		if (isset($_COOKIE[$application->config->session_name])) {
 			$properties['resumed'] = true;
 		} else {
 			$properties['resumed'] = false;

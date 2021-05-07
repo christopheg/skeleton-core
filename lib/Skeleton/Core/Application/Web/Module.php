@@ -6,7 +6,7 @@
  * @author Christophe Gosiau <christophe@tigron.be>
  */
 
-namespace Skeleton\Core\Web;
+namespace Skeleton\Core\Application\Web;
 
 use Skeleton\Core\Application;
 
@@ -170,23 +170,19 @@ abstract class Module {
 	 * @return Web_Module Requested module
 	 * @throws Exception
 	 */
-	public static function get($request_relative_uri) {
-		$application = \Skeleton\Core\Application::get();
+	public static function resolve($request_relative_uri) {
 		$relative_uri_parts = array_values(array_filter(explode('/', $request_relative_uri)));
-
-		$autoloader = new \Skeleton\Core\Autoloader();
-		$autoloader->add_include_path($application->module_path, 'Web_Module_');
-		$autoloader->register();
+		$relative_uri_parts = array_map('ucfirst', $relative_uri_parts);
+		$application = \Skeleton\Core\Application::get();
+		$module_namespace = $application->module_namespace;
 
 		$classnames = [];
-		$classnames[] = trim('Web_Module_' . implode('_', $relative_uri_parts), '_');
-		$classnames[] = trim('Web_Module_' . implode('_', $relative_uri_parts), '_') . '_' . $application->config->module_default;
-
-		try {
-			$classnames[] = 'Web_Module_' . $application->config->module_404;
-		} catch (\Exception $e) { }
+		$classnames[] = $module_namespace . implode('\\', $relative_uri_parts);
+		$classnames[] = $module_namespace . implode('\\', $relative_uri_parts) . "\\" . ucfirst($application->config->module_default);
+		$classnames[] = $module_namespace . "\\" . $application->config->module_404;
 
 		foreach ($classnames as $classname) {
+			$classname = str_replace('\\\\', '\\', $classname);
 			if (class_exists($classname) === false) {
 				continue;
 			}

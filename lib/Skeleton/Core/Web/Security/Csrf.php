@@ -76,7 +76,7 @@ class Csrf {
 			$this->post_token_name = $application->config->csrf_post_token_name;
 		}
 
-		if (\Skeleton\Core\Config::$csrf_enabled && !(isset($application->config->csrf_enabled) && $application->config->csrf_enabled == false))  {
+		if (isset($application->config->csrf_enabled) and $application->config->csrf_enabled)  {
 			$this->set_session_token();
 		} else {
 			$this->enabled = false;

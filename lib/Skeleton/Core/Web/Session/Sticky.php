@@ -47,10 +47,11 @@ class Sticky {
 	 * @param string $value
 	 */
 	public function __set($key, $value) {
-		if (!isset($_SESSION[Config::$sticky_session_name])) {
-			$_SESSION[Config::$sticky_session_name] = [];
+		$application = \Skeleton\Core\Application::get();
+		if (!isset($_SESSION[$application->config->sticky_session_name])) {
+			$_SESSION[$application->config->sticky_session_name] = [];
 		}
-		$_SESSION[Config::$sticky_session_name][$key] = ['counter' => 0, 'data' => $value];
+		$_SESSION[$application->Config->sticky_session_name][$key] = ['counter' => 0, 'data' => $value];
 	}
 
 	/**
@@ -61,10 +62,11 @@ class Sticky {
 	 * @param bool $remove_after_get
 	 */
 	public function __get($key) {
-		if (!isset($_SESSION[Config::$sticky_session_name][$key])) {
+		$application = \Skeleton\Core\Application::get();
+		if (!isset($_SESSION[$application->config->sticky_session_name][$key])) {
 			throw new Exception('Key not found');
 		}
-		return $_SESSION[Config::$sticky_session_name][$key]['data'];
+		return $_SESSION[$application->config->sticky_session_name][$key]['data'];
 	}
 
 	/**
@@ -74,7 +76,8 @@ class Sticky {
 	 * @param string $key
 	 */
 	public function __isset($key) {
-		if (!isset($_SESSION[Config::$sticky_session_name][$key])) {
+		$application = \Skeleton\Core\Application::get();
+		if (!isset($_SESSION[$application->config->sticky_session_name][$key])) {
 			return false;
 		} else {
 			return true;
@@ -88,7 +91,8 @@ class Sticky {
 	 * @param string $key
 	 */
 	public function __unset($key) {
-		unset($_SESSION[Config::$sticky_session_name][$key]);
+		$application = \Skeleton\Core\Application::get();
+		unset($_SESSION[$application->config->sticky_session_name][$key]);
 	}
 
 	/**
@@ -98,11 +102,12 @@ class Sticky {
 	 * @return array $variables
 	 */
 	public function get_as_array() {
+		$application = \Skeleton\Core\Application::get();
 		$variables = [];
-		if (!isset($_SESSION[Config::$sticky_session_name])) {
+		if (!isset($_SESSION[$application->config->sticky_session_name])) {
 			return [];
 		}
-		foreach ($_SESSION[Config::$sticky_session_name] as $key => $data) {
+		foreach ($_SESSION[$application->config->sticky_session_name] as $key => $data) {
 			$variables[$key] = $data['data'];
 		}
 		return $variables;
@@ -128,16 +133,17 @@ class Sticky {
 	 * @param string $module
 	 */
 	public static function cleanup() {
-		if (!isset($_SESSION[Config::$sticky_session_name])) {
+		$application = \Skeleton\Core\Application::get();
+		if (!isset($_SESSION[$application->config->sticky_session_name])) {
 			return;
 		}
 
-		foreach ($_SESSION[Config::$sticky_session_name] as $key => $variables) {
+		foreach ($_SESSION[$application->config->sticky_session_name] as $key => $variables) {
 			if (isset($variables['counter']) and $variables['counter'] < 1) {
-				$_SESSION[Config::$sticky_session_name][$key]['counter']++;
+				$_SESSION[$application->config->sticky_session_name][$key]['counter']++;
 				continue;
 			}
-			unset($_SESSION[Config::$sticky_session_name][$key]);
+			unset($_SESSION[$application->config->sticky_session_name][$key]);
 		}
 	}
 }

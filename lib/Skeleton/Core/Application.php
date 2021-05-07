@@ -10,7 +10,7 @@ namespace Skeleton\Core;
 
 class Exception_Unknown_Application extends \Exception {}
 
-class Application {
+abstract class Application {
 
 	/**
 	 * Application
@@ -29,28 +29,12 @@ class Application {
 	public $path = null;
 
 	/**
-	 * Media Path
+	 * Event Path
 	 *
-	 * @var string $media_path
+	 * @var string $event_path
 	 * @access public
 	 */
-	public $media_path = null;
-
-	/**
-	 * Module Path
-	 *
-	 * @var string $module_path
-	 * @access public
-	 */
-	public $module_path = null;
-
-	/**
-	 * Template path
-	 *
-	 * @var string $template_path
-	 * @ccess public
-	 */
-	public $template_path = null;
+	public $event_path = null;
 
 	/**
 	 * Name
@@ -125,19 +109,17 @@ class Application {
 	 * @access protected
 	 */
 	protected function get_details() {
-		$application_path = realpath(Config::$application_dir . '/' . $this->name);
+		$config = clone Config::get();
+		$this->config = $config;
+		$application_path = realpath($config->application_dir . '/' . $this->name);
 
 		if (!file_exists($application_path)) {
 			throw new \Exception('Application with name "' . $this->name . '" not found');
 		}
 		$this->path = $application_path;
+		$this->event_path = $this->path . '/event/';
 
 		$this->load_config();
-
-		$this->media_path = $application_path . '/media/';
-		$this->module_path = $application_path . '/module/';
-		$this->template_path = $application_path . '/template/';
-		$this->event_path = $application_path . '/event/';
 
 		if (class_exists('\Skeleton\I18n\Config') AND isset(\Skeleton\I18n\Config::$language_interface)) {
 			$classname = \Skeleton\I18n\Config::$language_interface;
@@ -153,16 +135,25 @@ class Application {
 	 *
 	 * @access private
 	 */
-	private function load_config() {
-		if (file_exists($this->path . '/config/Config.php')) {
-			require_once $this->path . '/config/Config.php';
-			$classname = 'Config_' . ucfirst($this->name);
-			$config = new $classname;
-		} else {
-			throw new \Exception('No config file in application directory. Please create "' . $this->path . '/config/Config.php');
+	protected function load_config() {
+		if (!file_exists($this->path . '/config')) {
+			throw new \Exception('No config directory created in app ' . $this->path);
 		}
-		$this->config = $config;
+
+		/**
+		 * Set some defaults
+		 */
+		$this->config->application_type = '\Skeleton\Core\Application\Web';
+
+		$this->config->read_directory($this->path . '/config');
 	}
+
+	/**
+	 * Run the application
+	 *
+	 * @access public
+	 */
+	abstract public function run();
 
 	/**
 	 * Check if an event exists
@@ -240,128 +231,6 @@ class Application {
 	 */
 	public function get_event_callable(string $context, string $action) {
 		return [$this->events[$context], $action];
-	}
-
-	/**
-	 * Search module
-	 *
-	 * @access public
-	 * @param string $request_uri
-	 */
-	public function route($request_uri) {
-		/**
-		 * Remove leading slash
-		 */
-		if ($request_uri[0] == '/') {
-			$request_uri = substr($request_uri, 1);
-		}
-
-		if (substr($request_uri, -1) == '/') {
-			$request_uri = substr($request_uri, 0, strlen($request_uri)-1);
-		}
-
-		if (!isset($this->config->base_uri)) {
-			$this->config->base_uri = '/';
-		}
-
-		if (strpos( '/' . $request_uri, $this->config->base_uri) === 0) {
-			$request_uri = substr($request_uri, strlen($this->config->base_uri)-1);
-		}
-		$request_parts = explode('/', $request_uri);
-
-		$routes = $this->config->routes;
-
-		/**
-		 * We need to find the route that matches the most the fixed parts
-		 */
-		$matched_module = null;
-		$best_matches_fixed_parts = 0;
-		$route = '';
-
-		foreach ($routes as $module => $uris) {
-			foreach ($uris as $uri) {
-				if (isset($uri[0]) AND $uri[0] == '/') {
-					$uri = substr($uri, 1);
-				}
-				$parts = explode('/', $uri);
-				$matches_fixed_parts = 0;
-				$match = true;
-
-				foreach ($parts as $key => $value) {
-					if (!isset($request_parts[$key])) {
-						$match = false;
-						continue;
-					}
-
-					if ($value == $request_parts[$key]) {
-						$matches_fixed_parts++;
-						continue;
-					}
-
-					if (isset($value[0]) AND $value[0] == '$') {
-						preg_match_all('/(\[(.*?)\])/', $value, $matches);
-						if (!isset($matches[2][0])) {
-							/**
-							 *  There are no possible values for the variable
-							 *  The match is valid
-							 */
-							 continue;
-						}
-
-						$possible_values = explode(',', $matches[2][0]);
-
-						$variable_matches = false;
-						foreach ($possible_values as $possible_value) {
-							if ($request_parts[$key] == $possible_value) {
-								$variable_matches = true;
-							}
-						}
-
-						if (!$variable_matches) {
-							$match = false;
-						}
-
-						// This is a variable, we do not increase the fixed parts
-						continue;
-					}
-					$match = false;
-				}
-
-
-				if ($match and count($parts) == count($request_parts)) {
-					if ($matches_fixed_parts >= $best_matches_fixed_parts) {
-						$best_matches_fixed_parts = $matches_fixed_parts;
-						$route = $uri;
-						$matched_module = $module;
-					}
-				}
-			}
-		}
-
-		if ($matched_module === null) {
-			throw new \Exception('No matching route found');
-		}
-
-		/**
-		 * We now have the correct route
-		 * Now fill in the GET-parameters
-		 */
-		$parts = explode('/', $route);
-
-		foreach ($parts as $key => $value) {
-			if (isset($value[0]) and $value[0] == '$') {
-				$value = substr($value, 1);
-				if (strpos($value, '[') !== false) {
-					$value = substr($value, 0, strpos($value, '['));
-				}
-				$_GET[$value] = $request_parts[$key];
-				$_REQUEST[$value] = $request_parts[$key];
-			}
-		}
-
-		$request_relative_uri = str_replace('web_module_', '', $matched_module);
-		$request_relative_uri = str_replace('_', '/', $request_relative_uri);
-		return \Skeleton\Core\Web\Module::get($request_relative_uri);
 	}
 
 	/**
@@ -508,17 +377,18 @@ class Application {
 	 * @return array $applications
 	 */
 	public static function get_all() {
-		if (Config::$application_dir === null) {
+		$config = Config::get();
+		if (!isset($config->application_dir)) {
 			throw new \Exception('No application_dir set. Please set Config::$application_dir');
 		}
-		$application_directories = scandir(Config::$application_dir);
+		$application_directories = scandir($config->application_dir);
 		$application = [];
 		foreach ($application_directories as $application_directory) {
 			if ($application_directory[0] == '.') {
 				continue;
 			}
 
-			$application = new self($application_directory);
+			$application = self::get_by_name($application_directory);
 			$applications[] = $application;
 		}
 		return $applications;
@@ -532,7 +402,10 @@ class Application {
 	 * @return Application $application
 	 */
 	public static function get_by_name($name) {
-		return new self($name);
+		$application = new Application\Web($name);
+		$config = $application->config;
+		$application_type = $config->application_type;
+		return new $application_type($name);
 	}
 
 	/**
@@ -582,6 +455,5 @@ class Application {
 
 		return self::get_by_name($name);
 	}
-
 
 }

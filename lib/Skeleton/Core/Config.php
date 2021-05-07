@@ -10,71 +10,151 @@
 namespace Skeleton\Core;
 
 class Config {
+	/**
+	 * Config array
+	 *
+	 * @var array
+	 * @access private
+	 */
+	protected $config_data = [];
 
 	/**
-	 * Application directory
+	 * Config object
 	 *
-	 * @access public
-	 * @var string $application_dir
+	 * @var Config
+	 * @access private
 	 */
-	public static $application_dir = null;
+	private static $config = null;
 
 	/**
-	 * Asset directory
+	 * Private (disabled) constructor
 	 *
-	 * A directory which will be searched for media failes in addition to the
-	 * application's media path
-	 *
-	 * @access public
-	 * @var string $asset_dir
+	 * @access private
 	 */
-	public static $asset_dir = null;
+	public function __construct() {
+	}
 
 	/**
-	 * Temp directory
+	 * Get config vars as properties
 	 *
+	 * @param string name
+	 * @return mixed
+	 * @throws Exception When accessing an unknown config variable, an Exception is thrown
 	 * @access public
-	 * @var string $tmp_dir
 	 */
-	public static $tmp_dir = null;
+	public function __get($name) {
+		if (!isset($this->config_data[$name])) {
+			throw new \Exception('Attempting to read unkown config key: '.$name);
+		}
+		return $this->config_data[$name];
+	}
 
 	/**
-	 * Name of the module that handles 403 errors
+	 * Get config vars as properties
 	 *
+	 * @param string name
+	 * @param mixed value
 	 * @access public
-	 * @var string $module_403
 	 */
-	public static $module_403 = null;
+	public function __set($name, $value) {
+		$this->config_data[$name] = $value;
+	}
 
 	/**
-	 * Name of the session
+	 * Get function, returns a Config object
 	 *
+	 * @return Config
 	 * @access public
-	 * @var string $session_name
 	 */
-	public static $session_name = 'APP';
+	public static function Get() {
+		if (!isset(self::$config)) {
+			try {
+				self::$config = \Skeleton\Core\Application::Get()->config;
+			} catch (\Exception $e) {
+				return new Config();
+			}
+		}
+		return self::$config;
+	}
 
 	/**
-	 * Name of the variable to store the sticky session object in
+	 * Check if config var exists
 	 *
+	 * @param string key
+	 * @return bool $isset
 	 * @access public
-	 * @var string $sticky_session_namse
 	 */
-	public static $sticky_session_name = 'sys_sticky_session';
+	public function __isset($key) {
+		if (!isset($this->config_data) OR $this->config_data === null) {
+			$this->read();
+		}
+
+		if (isset($this->config_data[$key])) {
+			return true;
+		}
+
+		return false;
+	}
 
 	/**
-	 * Enable automatic CSRF handling
+	 * Read a config file into this config
 	 *
 	 * @access public
-	 * @var boolean $csrf_enabled
 	 */
-	public static $csrf_enabled = false;
+	public function read_file($file) {
+		if (!file_exists($file)) {
+			throw new \Exception($file . ' cannot be included in config. File does not exist.');
+		}
+
+		$config_data = require $file;
+
+		if (!is_array($config_data)) {
+			return;
+		}
+		foreach ($config_data as $key => $value) {
+			$this->$key = $value;
+		}
+	}
 
 	/**
-	 * Enable automatic replay handling
+	 * Read config files from directory
 	 *
 	 * @access public
-	 * @var boolean $replay_enabled
 	 */
-	public static $replay_enabled = false;
+	public function read_directory($directory) {
+		if (!file_exists($directory)) {
+			throw new \Exception('Config directory does not exist');
+		}
+
+		foreach (new \DirectoryIterator($directory) as $item) {
+			if (!$item->isFile()) {
+				continue;
+			}
+			if ($item == 'environment.php') {
+				continue;
+			}
+			$this->read_file($directory . DIRECTORY_SEPARATOR . $item);
+		}
+
+		if (file_exists($directory . DIRECTORY_SEPARATOR . 'environment.php')) {
+			$this->read_file($directory . DIRECTORY_SEPARATOR . 'environment.php');
+		}
+	}
+
+
+	/**
+	 * Include a config directory
+	 *
+	 * @access public
+	 */
+	public static function include_directory($directory) {
+		if (!file_exists($directory)) {
+			throw new \Exception('Config directory does not exist');
+		}
+
+		$config = self::get();
+		$config->read_directory($directory);
+		self::$config = $config;
+	}
+
 }
