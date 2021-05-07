@@ -51,7 +51,7 @@ class Sticky {
 		if (!isset($_SESSION[$application->config->sticky_session_name])) {
 			$_SESSION[$application->config->sticky_session_name] = [];
 		}
-		$_SESSION[$application->Config->sticky_session_name][$key] = ['counter' => 0, 'data' => $value];
+		$_SESSION[$application->config->sticky_session_name][$key] = ['counter' => 0, 'data' => $value];
 	}
 
 	/**
