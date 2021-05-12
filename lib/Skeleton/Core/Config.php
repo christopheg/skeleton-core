@@ -67,14 +67,15 @@ class Config {
 	 * @access public
 	 */
 	public static function Get() {
-		if (!isset(self::$config)) {
-			try {
-				self::$config = \Skeleton\Core\Application::Get()->config;
-			} catch (\Exception $e) {
-				return new Config();
+		try {
+			$application = \Skeleton\Core\Application::get();
+			return $application->config;
+		} catch (\Exception $e) {
+			if (self::$config === null) {
+				throw new \Exception('No config set');
 			}
+			return self::$config;
 		}
-		return self::$config;
 	}
 
 	/**
@@ -158,7 +159,12 @@ class Config {
 			throw new \Exception('Config directory does not exist');
 		}
 
-		$config = self::get();
+		try {
+			$config = self::get();
+		} catch (\Exception $e) {
+			$config = new self();
+			self::$config = $config;
+		}
 		$config->read_directory($directory);
 		self::$config = $config;
 	}

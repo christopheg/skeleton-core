@@ -75,7 +75,7 @@ class Handler {
 		} catch (\Skeleton\Core\Exception_Unknown_Application $e) {
 			HTTP\Status::code_404('application');
 		}
-
+		\Skeleton\Core\Application::set($application);
 		$application->run();
 
 
