@@ -53,7 +53,7 @@ class Web extends \Skeleton\Core\Application {
 	 */
 	protected function get_details() {
 		parent::get_details();
-		
+
 		$this->media_path = $this->path . '/media/';
 		$this->template_path = $this->path . '/template/';
 		$this->module_path = $this->path . '/module/';
@@ -105,7 +105,7 @@ class Web extends \Skeleton\Core\Application {
 			try {
 				Media::detect($this->request_relative_uri);
 			} catch (\Skeleton\Core\Exception\Media\Not\Found $e) {
-				HTTP\Status::code_404('media');
+				\Skeleton\Core\Web\HTTP\Status::code_404('media');
 			}
 		}
 
