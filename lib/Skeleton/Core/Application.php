@@ -300,7 +300,6 @@ abstract class Application {
 				$matched_applications[] = $application;
 			}
 		}
-
 		// If we don't have any matched applications, try to match wildcards
 		if (count($matched_applications) === 0) {
 			foreach ($applications as $application) {

@@ -127,20 +127,22 @@ class Config {
 			throw new \Exception('Config directory does not exist');
 		}
 
-		foreach (new \DirectoryIterator($directory) as $item) {
-			if (!$item->isFile()) {
+		$files = scandir($directory);
+		foreach ($files as $file) {
+			if ($file[0] == '.') {
+				continue;
+			}
+			$info = pathinfo($file);
+
+			if (!isset($info['extension']) or $info['extension'] !== 'php') {
 				continue;
 			}
 
-			if ($item->getExtension() != 'php') {
-				// ignore non-php files
+			if ($info['filename'] == 'environment') {
 				continue;
 			}
 
-			if ($item == 'environment.php') {
-				continue;
-			}
-			$this->read_file($directory . DIRECTORY_SEPARATOR . $item);
+			$this->read_file($directory . DIRECTORY_SEPARATOR . $info['basename']);
 		}
 
 		if (file_exists($directory . DIRECTORY_SEPARATOR . 'environment.php')) {

@@ -123,7 +123,7 @@ class Web extends \Skeleton\Core\Application {
 		$module = null;
 		try {
 			// Attempt to find the module by matching defined routes
-			$module = $this->route($request_uri);
+			$module = $this->route($this->request_relative_uri);
 		} catch (\Exception $e) {
 			try {
 				// Attempt to find a module by matching paths
@@ -307,8 +307,9 @@ class Web extends \Skeleton\Core\Application {
 			}
 		}
 
-		$request_relative_uri = str_replace('web_module_', '', $matched_module);
-		$request_relative_uri = str_replace('_', '/', $request_relative_uri);
-		return \Skeleton\Core\Web\Module::get($request_relative_uri);
+		if (!class_exists($matched_module)) {
+			throw new \Exception('Incorrect classname for matching route');
+		}
+		return new $matched_module();
 	}
 }
