@@ -82,7 +82,6 @@ class Web extends \Skeleton\Core\Application {
 		$this->config->routes = [];
 		$this->config->default_language = 'en';
 		$this->config->module_default = 'index';
-		$this->config->module_404 = '404';
 		$this->config->sticky_pager = false;
 		$this->config->base_uri = '/';
 		$this->config->route_resolver = function($path) {

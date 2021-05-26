@@ -57,16 +57,9 @@ abstract class Module {
 
 		// If the request is not allowed, make sure it gets handled properly
 		if ($allowed === false) {
-			$module_403 = strtolower(\Skeleton\Core\Config::$module_403);
-
 			// Always check if it can not be handled by an event first
 			if ($application->event_exists('module', 'access_denied') === true) {
 				$application->call_event_if_exists('module', 'access_denied', [$this]);
-			} elseif ($module_403 !== null && file_exists($application->module_path . '/' . $module_403 . '.php') === true) {
-				require $application->module_path . '/' . $module_403 . '.php';
-				$classname = 'Web_Module_' . $module_403;
-				$module = new $classname;
-				$module->accept_request();
 			} else {
 				throw new \Exception('Access denied');
 			}
@@ -180,7 +173,6 @@ abstract class Module {
 		$classnames = [];
 		$classnames[] = $module_namespace . implode('\\', $relative_uri_parts);
 		$classnames[] = $module_namespace . implode('\\', $relative_uri_parts) . "\\" . ucfirst($application->config->module_default);
-		$classnames[] = $module_namespace . "\\" . $application->config->module_404;
 
 		foreach ($classnames as $classname) {
 			$classname = str_replace('\\\\', '\\', $classname);
