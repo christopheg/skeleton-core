@@ -93,7 +93,8 @@ abstract class Module {
 		$reflection = new \ReflectionClass($this);
 		$application = Application::Get();
 		$path = '/' . str_replace($application->module_path, '', $reflection->getFileName());
-
+		$path = strtolower($path);
+		
 		return str_replace('.php', '', $path);
 	}
 
