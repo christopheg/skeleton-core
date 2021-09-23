@@ -100,12 +100,17 @@ class Web extends \Skeleton\Core\Application {
 		/**
 		 * Handle the media
 		 */
+		$is_media = false;
 		if (isset($this->config->detect_media) AND $this->config->detect_media === true OR !isset($this->config->detect_media)) {
 			try {
-				Media::detect($this->request_relative_uri);
+				$is_media = Media::detect($this->request_relative_uri);
 			} catch (\Skeleton\Core\Exception\Media\Not\Found $e) {
 				\Skeleton\Core\Web\HTTP\Status::code_404('media');
 			}
+		}
+
+		if ($is_media === true) {
+			exit;
 		}
 
 		/**
