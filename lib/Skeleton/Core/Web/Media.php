@@ -104,7 +104,7 @@ class Media {
 
 		$known_extension = false;
 		foreach (self::$filetypes as $filetype => $extensions) {
-			if (in_array($pathinfo['extension'], $extensions)) {
+			if (in_array(strtolower($pathinfo['extension']), $extensions)) {
 				return true;
 			}
 		}
@@ -127,7 +127,7 @@ class Media {
 			// Add the media_path from the current application
 			if (isset($application->media_path)) {
 				foreach (self::$filetypes as $filetype => $extensions) {
-					if (!in_array($pathinfo['extension'], $extensions)) {
+					if (!in_array(strtolower($pathinfo['extension']), $extensions)) {
 						continue;
 					}
 					$filepaths[] = $application->media_path . '/' . $filetype . '/' . $pathinfo['dirname'] . '/' . $pathinfo['basename'];
@@ -148,7 +148,7 @@ class Media {
 				}
 
 				foreach (self::$filetypes as $filetype => $extensions) {
-					if (!in_array($pathinfo['extension'], $extensions)) {
+					if (!in_array(strtolower($pathinfo['extension']), $extensions)) {
 						continue;
 					}
 
