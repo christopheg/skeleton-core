@@ -181,7 +181,7 @@ class Web extends \Skeleton\Core\Application {
 			if ($this->event_exists('security', 'csrf_validation_failed')) {
 				$this->call_event_if_exists('security', 'csrf_validation_failed');
 			} else {
-				HTTP\Status::code_403('CSRF validation failed');
+				\Skeleton\Core\Web\HTTP\Status::code_403('CSRF validation failed');
 			}
 		}
 
