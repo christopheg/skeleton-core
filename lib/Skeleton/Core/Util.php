@@ -102,8 +102,10 @@ class Util {
 		/**
 		 * Add language to the known parameters
 		 */
+		$language_added = false;
 		if (isset($application->language) AND !isset($params['language'])) {
 			$params['language'] = $application->language->name_short;
+			$language_added = true;
 		}
 
 		/**
@@ -148,6 +150,7 @@ class Util {
 			$route_parts = explode('/', $route);
 			$route_part_matches = 0;
 			$params_matches = 0;
+
 			foreach ($route_parts as $key => $route_part) {
 				if (trim($route_part) == '') {
 					unset($route_parts[$key]);
@@ -204,7 +207,6 @@ class Util {
 				}
 			}
 
-
 			if ($route_part_matches == count($route_parts) AND $route_part_matches > $correct_route_params_matches) {
 				$correct_route = $route_parts;
 				$correct_route_params_matches = $route_part_matches;
@@ -230,7 +232,9 @@ class Util {
 		/**
 		 * Language param was added earlier. Remove it. It should not be included if it was not part of the route
 		 */
-		unset($params['language']);
+		if ($language_added) {
+			unset($params['language']);
+		}
 
 		/**
 		 * If the first character is a /, remove it
