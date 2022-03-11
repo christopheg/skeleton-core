@@ -111,7 +111,15 @@ abstract class Application {
 	protected function get_details() {
 		$config = clone Config::get();
 		$this->config = $config;
-		$application_path = realpath($config->application_dir . '/' . $this->name);
+
+		/**
+		 * @deprecated: this is for backwards compatibility
+		 */
+		if (isset($config->application_dir) and !isset($config->application_path)) {
+			$config->application_path = $config->application_dir;
+		}
+
+		$application_path = realpath($config->application_path . '/' . $this->name);
 
 		if (!file_exists($application_path)) {
 			throw new \Exception('Application with name "' . $this->name . '" not found');
@@ -145,7 +153,7 @@ abstract class Application {
 		 */
 		$this->config->application_type = '\Skeleton\Core\Application\Web';
 
-		$this->config->read_directory($this->path . '/config');
+		$this->config->read_path($this->path . '/config');
 	}
 
 	/**
@@ -377,17 +385,25 @@ abstract class Application {
 	 */
 	public static function get_all() {
 		$config = Config::get();
-		if (!isset($config->application_dir)) {
-			throw new \Exception('No application_dir set. Please set Config::$application_dir');
+
+		/**
+		 * @deprecated: this is for backwards compatibility
+		 */
+		if (isset($config->application_dir) and !isset($config->application_path)) {
+			$config->application_path = $config->application_dir;
 		}
-		$application_directories = scandir($config->application_dir);
+
+		if (!isset($config->application_path)) {
+			throw new \Exception('No application_path set. Please set "application_path" in project configuration');
+		}
+		$application_paths = scandir($config->application_path);
 		$application = [];
-		foreach ($application_directories as $application_directory) {
-			if ($application_directory[0] == '.') {
+		foreach ($application_paths as $application_path) {
+			if ($application_path[0] == '.') {
 				continue;
 			}
 
-			$application = self::get_by_name($application_directory);
+			$application = self::get_by_name($application_path);
 			$applications[] = $application;
 		}
 		return $applications;
@@ -406,53 +422,4 @@ abstract class Application {
 		$application_type = $config->application_type;
 		return new $application_type($name);
 	}
-
-	/**
-	 * Create an app
-	 *
-	 * @access public
-	 * @param string $name
-	 * @return Application $application
-	 */
-	public static function create($name, $settings) {
-		$name = strtolower($name);
-		$application_path = realpath(Config::$application_dir);
-
-		if (!file_exists($application_path)) {
-			throw new \Exception('There is no application path defined. Please specificy a path in \Skeleton\Core\Config::$application_dir');
-		}
-
-		if (file_exists($application_path . '/' . $name)) {
-			throw new \Exception('There is already an app with this name created');
-		}
-
-		// Create the required directories
-		mkdir($application_path . '/' . $name);
-		mkdir($application_path . '/' . $name . '/config');
-		mkdir($application_path . '/' . $name . '/media');
-		mkdir($application_path . '/' . $name . '/module');
-		mkdir($application_path . '/' . $name . '/template');
-		mkdir($application_path . '/' . $name . '/event');
-
-		$root_path = dirname(__FILE__) . '/../../../';
-
-		$config = file_get_contents($root_path . '/template/config/Config.php.tpl');
-		$config = str_replace('%%APP_NAME%%', ucfirst($name), $config);
-
-		foreach ($settings['hostnames'] as $key => $hostname) {
-			$settings['hostnames'][$key] = "'" . $hostname . "'";
-		}
-
-		$config = str_replace('%%HOSTNAMES%%', '[' . implode(', ', $settings['hostnames']) . ']', $config);
-		file_put_contents($application_path . '/' . $name . '/config/Config.php', $config);
-
-		$module = file_get_contents($root_path . '/template/module/index.php.tpl');
-		file_put_contents($application_path . '/' . $name . '/module/index.php', $module);
-
-		$template = file_get_contents($root_path . '/template/template/index.twig.tpl');
-		file_put_contents($application_path . '/' . $name . '/template/index.twig', $template);
-
-		return self::get_by_name($name);
-	}
-
 }

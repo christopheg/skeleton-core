@@ -94,7 +94,7 @@ abstract class Module {
 		$application = Application::Get();
 		$path = '/' . str_replace($application->module_path, '', $reflection->getFileName());
 		$path = strtolower($path);
-		
+
 		return str_replace('.php', '', $path);
 	}
 
@@ -187,18 +187,4 @@ abstract class Module {
 		throw new \Exception('Module not found');
 	}
 
-	/**
-	 * Check if a module exists
-	 *
-	 * @param string Name of the module
-	 * @access public
-	 * @return bool
-	 */
-	public static function exists($name) {
-		if (Config::$application_dir === null) {
-			throw new \Exception('No application_dir set. Please set Config::$application_dir');
-		}
-
-		return (file_exists(Config::$application_dir . '/module/' . $name . '.php'));
-	}
 }

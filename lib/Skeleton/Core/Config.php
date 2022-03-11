@@ -122,12 +122,12 @@ class Config {
 	 *
 	 * @access public
 	 */
-	public function read_directory($directory) {
-		if (!file_exists($directory)) {
+	public function read_path($path) {
+		if (!file_exists($path)) {
 			throw new \Exception('Config directory does not exist');
 		}
 
-		$files = scandir($directory);
+		$files = scandir($path);
 		foreach ($files as $file) {
 			if ($file[0] == '.') {
 				continue;
@@ -142,22 +142,21 @@ class Config {
 				continue;
 			}
 
-			$this->read_file($directory . DIRECTORY_SEPARATOR . $info['basename']);
+			$this->read_file($path . DIRECTORY_SEPARATOR . $info['basename']);
 		}
 
-		if (file_exists($directory . DIRECTORY_SEPARATOR . 'environment.php')) {
-			$this->read_file($directory . DIRECTORY_SEPARATOR . 'environment.php');
+		if (file_exists($path . DIRECTORY_SEPARATOR . 'environment.php')) {
+			$this->read_file($path . DIRECTORY_SEPARATOR . 'environment.php');
 		}
 	}
-
 
 	/**
 	 * Include a config directory
 	 *
 	 * @access public
 	 */
-	public static function include_directory($directory) {
-		if (!file_exists($directory)) {
+	public static function include_path($path) {
+		if (!file_exists($path)) {
 			throw new \Exception('Config directory does not exist');
 		}
 
@@ -167,8 +166,17 @@ class Config {
 			$config = new self();
 			self::$config = $config;
 		}
-		$config->read_directory($directory);
+		$config->read_path($path);
 		self::$config = $config;
+	}
+
+	/**
+	 * Include a config directory
+	 *
+	 * @access public
+	 */
+	public static function include_directory($directory) {
+		self::include_path($directory);
 	}
 
 }

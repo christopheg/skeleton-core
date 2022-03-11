@@ -42,7 +42,7 @@ Each key/value pair will be available in your project.
 
 Include a config directory
 
-    \Skeleton\Core\Config::include_directory('/config');
+    \Skeleton\Core\Config::include_path('/config');
 
 PHP files stored in the config directory will be evaluated in alphabetical
 order. In case you have environment-specific configuration, you can create a
@@ -54,13 +54,13 @@ Get a config object
 
 Skeleton needs at least these config items to operate properly:
 
-	'application_dir': The root directory where skeleton can find Skeleton
+	'application_path': The root path where skeleton can find Skeleton
 	Applications
 
 Your webserver should rewrite every request to a single PHP file. This file
 will start your skeleton project. It should include at least the following
 
-    \Skeleton\Core\Config::include_directory('config');
+    \Skeleton\Core\Config::include_path('config');
     \Skeleton\Core\Web\Handler::Run();
 
 Altough a skeleton project can have any desired directory structure, we
@@ -86,7 +86,7 @@ There are various types of applications. Skeleton-core includes the most-used:
 
 	\Skeleton\Core\Application\Web
 
-Other applications are available via skeleton packages (eg 	
+Other applications are available via skeleton packages (eg
 [skeleton-application-api](https://github.com/tigron/skeleton-application-api)
 
 A Skeleton Application\Web is a common application that handles any type of
@@ -108,15 +108,15 @@ directory structure within the application:
           - javascript
           - image
 
-If you want media files to be served from an additional directory, for example
+If you want media files to be served from additional paths, for example
 if you have a package manager such as `bower`, `yarn` or even the
-`fxp/composer-asset-plugin`, you can specify an additional directory which will
+`fxp/composer-asset-plugin`, you can specify additional paths which will
 be searched in addition to the default `media` one.
 
-To enable media serving from an additional asset directory, include the
+To enable media serving from an additional asset path, include the
 following configuration directive in your skeleton project:
 
-	'asset_dir': The asset directory where media files can be served from if
+	'asset_paths': The asset paths where media files can be served from if
 	they are not found in your application.
 
 
@@ -135,7 +135,7 @@ The following optional configurations can be set:
 |----|----|----|----|
 |hostnames|(required)an array containing the hostnames to listen for. Wildcards can be used via `*`.| []| [ 'www.example.be, '*.example.be' ]|
 |base_uri|Specifies the base uri for the application. If a base_uri is specified, it will be included in the reverse url generation|'/'|'/v1'|
-|default_language|This is the ISO 639-1 code for the default language to be used, if no more specific one can be found|'en'|'en', 'nl', any language iso2 code provided by skeleton-i18n|	
+|default_language|This is the ISO 639-1 code for the default language to be used, if no more specific one can be found|'en'|'en', 'nl', any language iso2 code provided by skeleton-i18n|
 |session_name|The name given to your session|'App'|any string|
 |sticky_session_name|The key in your session where sticky session information is stored|'sys_sticky_session'|any string|
 |csrf_enabled|Enable CSRF|false|true/false|
@@ -213,7 +213,7 @@ This can be best explained with some examples:
 
 As you can see in the last two examples, the `index` modules are a bit special,
 in that they can be used instead of the underlying one if they sit in a
-subfolder. The `index` is configurable via configuration directive 
+subfolder. The `index` is configurable via configuration directive
 `module_default`
 
 ### Routing to the correct method
@@ -318,8 +318,8 @@ Events can be created to perform a task at specific key points during the
 application's execution.
 
 Events are defined in `Event` context classes. These classes are optional, but
-when they are used, they should be located in the `event` directory of your 
-application. The filename should be in the form of `Context_name.php`, for 
+when they are used, they should be located in the `event` directory of your
+application. The filename should be in the form of `Context_name.php`, for
 example `Application.php`.
 
 The class should extend from `Skeleton\Core\Event` and the classname should be

@@ -134,9 +134,27 @@ class Media {
 				}
 			}
 
-			// Add the global asset directory
+			// Add the global asset paths
 			$config = \Skeleton\Core\Config::get();
-			$filepaths[] = $config->asset_dir . '/' . $pathinfo['dirname'] . '/' . $pathinfo['basename'];
+
+			/**
+			 * @deprecated: this is for backwards compatibility
+			 */
+			if (isset($config->asset_dir) and !isset($config->asset_paths)) {
+				$config->asset_paths = $config->asset_dir;
+			}
+
+			if (isset($config->asset_paths)) {
+				if (!is_array($config->asset_paths)) {
+					$asset_paths = [ $config->asset_paths ];
+				} else {
+					$asset_paths = $config->asset_paths;
+				}
+
+				foreach ($asset_paths as $asset_path) {
+					$filepaths[] = $asset_path . '/' . $pathinfo['dirname'] . '/' . $pathinfo['basename'];
+				}
+			}
 
 			// Add the asset path of every package
 			$packages = \Skeleton\Core\Skeleton::get_all();

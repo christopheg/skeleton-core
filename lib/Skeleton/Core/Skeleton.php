@@ -61,8 +61,8 @@ class Skeleton {
 			/**
 			 * Search for other Skeleton packages installed
 			 */
-			$composer_dir = realpath(__DIR__ . '/../../../../../');
-			$installed = file_get_contents($composer_dir . '/composer/installed.json');
+			$composer_path = realpath(__DIR__ . '/../../../../../');
+			$installed = file_get_contents($composer_path . '/composer/installed.json');
 			$installed = json_decode($installed);
 
 			// The structure of the installed.json file in composer 2 is slightly different
@@ -80,10 +80,10 @@ class Skeleton {
 
 				$skeleton = new self();
 				$skeleton->name = $name;
-				$skeleton->path = $composer_dir . '/tigron/' . $name;
-				$skeleton->template_path = $composer_dir . '/tigron/' . $name . '/template';
-				$skeleton->asset_path = $composer_dir . '/tigron/' . $name . '/media';
-				$skeleton->migration_path = $composer_dir . '/tigron/' . $name . '/migration';
+				$skeleton->path = $composer_path . '/tigron/' . $name;
+				$skeleton->template_path = $composer_path . '/tigron/' . $name . '/template';
+				$skeleton->asset_path = $composer_path . '/tigron/' . $name . '/media';
+				$skeleton->migration_path = $composer_path . '/tigron/' . $name . '/migration';
 
 				$skeletons[] = $skeleton;
 			}
