@@ -44,14 +44,14 @@ class Template {
 		$application = \Skeleton\Core\Application::Get();
 
 		if (isset($application->template_path) and file_exists($application->template_path)) {
-			$this->template->add_template_directory($application->template_path);
+			$this->template->add_template_path($application->template_path);
 		}
 
 		$skeletons = \Skeleton\Core\Skeleton::get_all();
 
 		foreach ($skeletons as $skeleton) {
 			if (file_exists($skeleton->template_path)) {
-				$this->template->add_template_directory($skeleton->template_path, $skeleton->name);
+				$this->template->add_template_path($skeleton->template_path, $skeleton->name);
 			}
 		}
 	}
@@ -87,7 +87,22 @@ class Template {
 	 * @param bool $prepend
 	 */
 	public function add_template_directory($path, $namespace = null, $prepend = false) {
-		$this->template->add_template_directory($path, $namespace, $prepend);
+		/**
+		 * @Deprecated: for backwards compatibility
+		 */
+		$this->template->add_template_path($path, $namespace, $prepend);
+	}
+
+	/**
+	 * Add template directory
+	 *
+	 * @access public
+	 * @param string $path
+	 * @param string $namespace
+	 * @param bool $prepend
+	 */
+	public function add_template_path($path, $namespace = null, $prepend = false) {
+		$this->template->add_template_path($path, $namespace, $prepend);
 	}
 
 	/**
