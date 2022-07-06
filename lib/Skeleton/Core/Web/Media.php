@@ -248,18 +248,11 @@ class Media {
 		// reset the pointer to make sure we're at the beginning
 		fseek($file, 0, SEEK_SET);
 
-		$ranges = null;
-		if (
-			$_SERVER['REQUEST_METHOD'] === 'GET' &&
-			isset($_SERVER['HTTP_RANGE']) &&
-			$range = stristr(trim($_SERVER['HTTP_RANGE']), 'bytes=')
-		) {
-			$range = substr($range, 6); // 6 == strlen('bytes=')
-			$boundary = bin2hex(random_bytes(48)); // generate a random boundary
-			$ranges = explode(',', $range);
-		}
+		$ranges = $this->get_http_range();
 
 		if ($ranges !== null && count($ranges)) {
+			$boundary = bin2hex(random_bytes(48)); // generate a random boundary
+
 			http_response_code(206);
 			header('Accept-Ranges: bytes');
 
@@ -354,11 +347,10 @@ class Media {
 	* @param int $last
 	*/
 	private function serve_content_set_range(string $range, int $filesize, int &$first, int &$last) {
-		$dash = strpos($range, '-');
-		$first = trim(substr($range, 0, $dash));
-		$last = trim(substr($range, $dash + 1));
+		// $range in the correct format by earlier validation
+		list($first, $last) = explode('-', $range);
 
-		if ($first == '') {
+		if ($first === '') {
 			// suffix byte range: gets last n bytes
 			$suffix = $last;
 			$last = $filesize - 1;
@@ -367,7 +359,7 @@ class Media {
 			if ($first < 0) {
 				$first = 0;
 			}
-		} elseif ($last=='' || $last > $filesize - 1) {
+		} elseif ($last === '' || $last > $filesize - 1) {
 			$last = $filesize - 1;
 		}
 
@@ -411,10 +403,45 @@ class Media {
 			return;
 		}
 
-		if ($_SERVER['HTTP_IF_MODIFIED_SINCE'] == gmdate('D, d M Y H:i:s', $this->get_mtime()).' GMT') {
+		if ($_SERVER['HTTP_IF_MODIFIED_SINCE'] === gmdate('D, d M Y H:i:s', $this->get_mtime()).' GMT') {
 			header('Expires: ');
 			HTTP\Status::code_304();
 		}
+	}
+
+	/**
+	 * Check for an HTTP range request, return ranges if found
+	 *
+	 * @access private
+	 * @return ?array Returns an array of requested ranges or null if not a range request
+	 */
+	private function get_http_range(): ?array {
+		if ($_SERVER['REQUEST_METHOD'] !== 'GET' || !isset($_SERVER['HTTP_RANGE'])) {
+			return null;
+		}
+
+		// "bytes" is currently the only supported unit
+		//
+		// https://www.rfc-editor.org/rfc/rfc9110.html#section-14.1
+		// https://www.rfc-editor.org/rfc/rfc9110.html#range.unit.registry
+		// https://www.iana.org/assignments/http-parameters/http-parameters.xhtml#range-units
+		//
+		// Multiple byte ranges must be separated by a comma and a space
+		// While not technically valid, omitting the space is allowed
+		// https://www.rfc-editor.org/rfc/rfc9110.html#section-14.1.2-9.4.2
+		//
+		// The regular expression is based on PEAR's HTTP_Download2 package
+		// https://github.com/pear/HTTP_Download2/blob/64c1870c5b188dd73ee313ee212a7dd48ae1b541/HTTP/Download2.php#L1101
+		$range_regex = '/^bytes=((\d+-|\d+-\d+|-\d+)(, ?(\d+-|\d+-\d+|-\d+))*)$/';
+		$match = preg_match($range_regex, $_SERVER['HTTP_RANGE'], $matches);
+
+		// Range header does not match the range format, do not fail but just
+		// treat this as a non-range request
+		if ($match === false || $match === 0) {
+			return null;
+		}
+
+		return explode(',', str_replace(' ', '', $matches[1]));
 	}
 
 	/**
@@ -504,7 +531,7 @@ class Media {
 	 */
 	public static function detect($request_uri): bool {
 		// Don't bother looking up /
-		if ($request_uri == '/') {
+		if ($request_uri === '/') {
 			return false;
 		}
 
