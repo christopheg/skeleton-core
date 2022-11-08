@@ -170,6 +170,18 @@ class Web extends \Skeleton\Core\Application {
 				}
 			}
 			$this->language = $_SESSION['language'];
+
+			// Configure translation
+			if (class_exists('\Skeleton\I18n\Translator\Storage\Po')) {
+				$translator_storage_po = new \Skeleton\I18n\Translator\Storage\Po();
+				$translator = new \Skeleton\I18n\Translator($this->name);
+				$translator->set_translator_storage($translator_storage_po);
+
+				$translator_extractor_twig = new \Skeleton\I18n\Translator\Extractor\Twig();
+				$translator_extractor_twig->set_template_path($this->template_path);			
+				$translator->set_translator_extractor($translator_extractor_twig);
+				$translator->save();
+			}
 		}
 
 		/**
