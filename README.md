@@ -233,6 +233,10 @@ Some examples:
 
 You can add a 'bootstrap()' method to your module to execute this part of code everytime the module is accessed.
 
+### Securing a specific module
+
+You can add a 'secure(): bool' method to your module to determine if the module can be accessed with the given data.
+
 ### Handling of media files
 
 If the requested url contains an extension which matches a known media type, the
