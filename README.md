@@ -229,6 +229,10 @@ Some examples:
 | /user            | \App\APP_NAME\Module\User     | display()            |
 | /user?action=test| \App\APP_NAME\Module\User     | display_test()       |
 
+### Bootstrapping a specific module
+
+You can add a 'bootstrap()' method to your module to execute this part of code everytime the module is accessed.
+
 ### Handling of media files
 
 If the requested url contains an extension which matches a known media type, the
