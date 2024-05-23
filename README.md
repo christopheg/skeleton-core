@@ -1,3 +1,5 @@
+![PHP Insights](https://github.com/christopheg/skeleton-core/actions/workflows/phpinsights.yml/badge.svg)
+
 # skeleton-core
 
 ## Description
