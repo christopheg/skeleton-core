@@ -13,5 +13,5 @@ jobs:
         - name: PHP-Insights
           uses: docker://tigron/skeleton-test-phpinsights:php82
           with:
-            args: "-v --min-quality=70 --min-complexity=0 --min-architecture=50 --min-style=60"
+            args: "-v --min-quality=70 --min-complexity=0 --min-architecture=50 --min-style=60 --ansi --format=github-action"
 
