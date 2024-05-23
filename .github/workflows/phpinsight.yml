@@ -1,0 +1,17 @@
+#.github/workflows/pr.yml
+name: CI
+on:
+    - pull_request
+    - push
+
+jobs:
+    phpinsights:
+        runs-on: ubuntu-latest
+        name: PHP Insights checks
+        steps:
+        - uses: actions/checkout@master
+        - name: PHP-Insights
+          uses: docker://tienvx/phpinsights-action
+          with:
+            args: "-v --min-quality=70 --min-complexity=70 --min-architecture=50 --min-style=80"
+
