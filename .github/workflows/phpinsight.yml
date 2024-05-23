@@ -11,7 +11,7 @@ jobs:
         steps:
         - uses: actions/checkout@master
         - name: PHP-Insights
-          uses: docker://tienvx/phpinsights-action
+          uses: docker://tigron/skeleton-test-phpinsights
           with:
             args: "-v --min-quality=70 --min-complexity=0 --min-architecture=50 --min-style=60"
 
