@@ -1,5 +1,7 @@
 ![PHP Insights](https://github.com/christopheg/skeleton-core/actions/workflows/phpinsights.yml/badge.svg)
 
+a test change
+
 # skeleton-core
 
 ## Description
